@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 裂变任务</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .fission-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Hero Section */
+    .fission-hero {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      padding: 24px;
+      margin: 0 16px;
+      border-radius: var(--radius-xl);
+      position: relative;
+      overflow: hidden;
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .fission-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 24px;
+    }
+
+    /* Progress Section */
+    .progress-section {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .progress-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .progress-count {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .progress-count span {
+      font-size: 14px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-gold), #FFE066);
+      border-radius: var(--radius-full);
+      width: 60%;
+      transition: width 1s ease;
+    }
+
+    .progress-milestones {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .milestone {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .milestone.achieved {
+      color: var(--accent-gold);
+    }
+
+    /* Reward Card */
+    .reward-card {
+      margin: 20px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      border: 1px solid var(--glass-border);
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .reward-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .reward-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent-gold), #D4A600);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .reward-info h3 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .reward-info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Reward Tiers */
+    .reward-tiers {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tier-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      position: relative;
+    }
+
+    .tier-item.achieved {
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.1), rgba(48, 209, 88, 0.05));
+      border: 1px solid var(--accent-green);
+    }
+
+    .tier-item.current {
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(10, 132, 255, 0.05));
+      border: 1px solid var(--primary);
+    }
+
+    .tier-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--glass-bg);
+      color: var(--text-secondary);
+    }
+
+    .tier-item.achieved .tier-badge {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .tier-item.current .tier-badge {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tier-content {
+      flex: 1;
+    }
+
+    .tier-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .tier-reward {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .tier-status {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-weight: 500;
+    }
+
+    .tier-item.achieved .tier-status {
+      background: rgba(48, 209, 88, 0.2);
+      color: var(--accent-green);
+    }
+
+    .tier-item.current .tier-status {
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+
+    .tier-item:not(.achieved):not(.current) .tier-status {
+      background: var(--glass-bg);
+      color: var(--text-tertiary);
+    }
+
+    /* Generate Poster Button */
+    .poster-button {
+      margin: 24px 16px;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .btn-generate {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: var(--shadow-glow);
+      transition: var(--transition-normal);
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px var(--primary-glow);
+    }
+
+    /* Invite Records */
+    .records-section {
+      padding: 0 16px;
+      animation: slideUp 0.5s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .view-all {
+      font-size: 13px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .invite-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .invite-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+    }
+
+    .invite-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .invite-info {
+      flex: 1;
+    }
+
+    .invite-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .invite-time {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .invite-status {
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .invite-status.success {
+      background: rgba(48, 209, 88, 0.2);
+      color: var(--accent-green);
+    }
+
+    .invite-status.pending {
+      background: rgba(255, 159, 10, 0.2);
+      color: var(--accent-orange);
+    }
+
+    /* Ranking Entry */
+    .ranking-entry {
+      margin: 24px 16px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.1), rgba(255, 214, 10, 0.05));
+      border: 1px solid var(--accent-gold);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      animation: slideUp 0.5s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .ranking-entry:hover {
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.15), rgba(255, 214, 10, 0.08));
+    }
+
+    .ranking-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ranking-icon {
+      font-size: 24px;
+    }
+
+    .ranking-text h4 {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--accent-gold);
+      margin-bottom: 4px;
+    }
+
+    .ranking-text p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .ranking-arrow {
+      color: var(--accent-gold);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="fission-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+              <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+              <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">邀请有礼</span>
+          <div class="action"></div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="fission-hero">
+          <div class="hero-content">
+            <h1 class="hero-title">邀请好友 共享好礼</h1>
+            <p class="hero-subtitle">每邀请1位好友注册，双方都可获得奖励</p>
+
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">当前进度</span>
+                <span class="progress-count">3 <span>/ 5人</span></span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <div class="progress-milestones">
+                <span class="milestone achieved">1人</span>
+                <span class="milestone achieved">3人</span>
+                <span class="milestone">5人</span>
+                <span class="milestone">10人</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reward Card -->
+        <div class="reward-card">
+          <div class="reward-header">
+            <div class="reward-icon">🎁</div>
+            <div class="reward-info">
+              <h3>阶梯奖励</h3>
+              <p>邀请越多，奖励越丰厚</p>
+            </div>
+          </div>
+
+          <div class="reward-tiers">
+            <div class="tier-item achieved">
+              <div class="tier-badge">1</div>
+              <div class="tier-content">
+                <div class="tier-title">邀请1人</div>
+                <div class="tier-reward">获得 50 积分</div>
+              </div>
+              <span class="tier-status">已达成</span>
+            </div>
+            <div class="tier-item achieved">
+              <div class="tier-badge">3</div>
+              <div class="tier-content">
+                <div class="tier-title">邀请3人</div>
+                <div class="tier-reward">获得 200 积分</div>
+              </div>
+              <span class="tier-status">已达成</span>
+            </div>
+            <div class="tier-item current">
+              <div class="tier-badge">5</div>
+              <div class="tier-content">
+                <div class="tier-title">邀请5人</div>
+                <div class="tier-reward">获得 500 积分 + 洗车券</div>
+              </div>
+              <span class="tier-status">进行中</span>
+            </div>
+            <div class="tier-item">
+              <div class="tier-badge">10</div>
+              <div class="tier-content">
+                <div class="tier-title">邀请10人</div>
+                <div class="tier-reward">获得 1000 积分 + 保养券</div>
+              </div>
+              <span class="tier-status">未达成</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate Poster -->
+        <div class="poster-button">
+          <button class="btn-generate">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15L16 10L5 21"/>
+            </svg>
+            生成专属海报
+          </button>
+        </div>
+
+        <!-- Invite Records -->
+        <div class="records-section">
+          <div class="section-header">
+            <h3 class="section-title">邀请记录</h3>
+            <span class="view-all">查看全部</span>
+          </div>
+
+          <div class="invite-list">
+            <div class="invite-item">
+              <div class="invite-avatar">👤</div>
+              <div class="invite-info">
+                <div class="invite-name">微信用户***8</div>
+                <div class="invite-time">2025-01-06 14:32</div>
+              </div>
+              <span class="invite-status success">已注册</span>
+            </div>
+            <div class="invite-item">
+              <div class="invite-avatar">👤</div>
+              <div class="invite-info">
+                <div class="invite-name">微信用户***2</div>
+                <div class="invite-time">2025-01-05 09:15</div>
+              </div>
+              <span class="invite-status success">已注册</span>
+            </div>
+            <div class="invite-item">
+              <div class="invite-avatar">👤</div>
+              <div class="invite-info">
+                <div class="invite-name">微信用户***6</div>
+                <div class="invite-time">2025-01-04 18:42</div>
+              </div>
+              <span class="invite-status success">已注册</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ranking Entry -->
+        <div class="ranking-entry">
+          <div class="ranking-left">
+            <span class="ranking-icon">🏆</span>
+            <div class="ranking-text">
+              <h4>邀请排行榜</h4>
+              <p>看看你的排名，冲击周榜TOP10</p>
+            </div>
+          </div>
+          <svg class="ranking-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 客户详情</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .detail-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Customer Header */
+    .customer-header {
+      padding: 0 20px 24px;
+      text-align: center;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .avatar-large {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 600;
+      color: white;
+      margin: 0 auto 16px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .customer-name-section h2 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .customer-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .level-tag {
+      padding: 4px 12px;
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1));
+      border: 1px solid var(--accent-gold);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    .level-tag.silver {
+      background: rgba(192, 192, 192, 0.2);
+      border-color: #C0C0C0;
+      color: #C0C0C0;
+    }
+
+    .level-tag.normal {
+      background: var(--bg-secondary);
+      border-color: var(--border-light);
+      color: var(--text-secondary);
+    }
+
+    .phone-display {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .register-info {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 0 16px 20px;
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px 8px;
+      text-align: center;
+      border: 1px solid var(--border-light);
+    }
+
+    .stat-box .value {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-box .label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Action Buttons */
+    .action-row {
+      display: flex;
+      gap: 12px;
+      padding: 0 16px 20px;
+      animation: slideUp 0.5s ease 0.15s forwards;
+      opacity: 0;
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .action-btn:hover {
+      border-color: var(--primary);
+    }
+
+    .action-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Section */
+    .section {
+      padding: 0 16px 20px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .section-more {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Prize List */
+    .prize-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .prize-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+    }
+
+    .prize-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .prize-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .prize-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .prize-info p {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .prize-status {
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .prize-status.pending {
+      background: rgba(255, 159, 10, 0.2);
+      color: var(--accent-orange);
+    }
+
+    .prize-status.used {
+      background: rgba(99, 99, 102, 0.2);
+      color: var(--text-tertiary);
+    }
+
+    /* Activity Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      animation: slideUp 0.5s ease 0.25s forwards;
+      opacity: 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--border-light);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 0 0 20px 0;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      background: var(--primary);
+      border-radius: 50%;
+      border: 2px solid var(--bg-primary);
+    }
+
+    .timeline-content {
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .timeline-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .timeline-time {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Remark Section */
+    .remark-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid var(--border-light);
+      animation: slideUp 0.5s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .remark-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+
+    .remark-content {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .edit-remark {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="detail-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">客户详情</span>
+          <div class="action">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="19" cy="12" r="1"/>
+              <circle cx="5" cy="12" r="1"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Customer Header -->
+        <div class="customer-header">
+          <div class="avatar-large">张</div>
+          <div class="customer-name-section">
+            <h2>张先生</h2>
+            <div class="customer-meta">
+              <span class="level-tag">黄金会员</span>
+              <span class="phone-display">138****8888</span>
+            </div>
+            <p class="register-info">注册于 2024-06-15 · 已绑定企微</p>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="value">2,580</div>
+            <div class="label">当前积分</div>
+          </div>
+          <div class="stat-box">
+            <div class="value">12</div>
+            <div class="label">邀请好友</div>
+          </div>
+          <div class="stat-box">
+            <div class="value">5</div>
+            <div class="label">已核销</div>
+          </div>
+          <div class="stat-box">
+            <div class="value">3</div>
+            <div class="label">待核销</div>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+          <div class="action-btn">
+            <span>📞</span>
+            拨打电话
+          </div>
+          <div class="action-btn primary">
+            <span>💬</span>
+            发送消息
+          </div>
+        </div>
+
+        <!-- Prizes Section -->
+        <div class="section">
+          <div class="section-header">
+            <h3 class="section-title">待核销奖品</h3>
+            <span class="section-more">
+              全部
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </span>
+          </div>
+          <div class="prize-list">
+            <div class="prize-item">
+              <div class="prize-icon">🎫</div>
+              <div class="prize-info">
+                <h4>500元保养券</h4>
+                <p>来源: 幸运扭蛋 · 有效期至 2025-03-31</p>
+              </div>
+              <span class="prize-status pending">待核销</span>
+            </div>
+            <div class="prize-item">
+              <div class="prize-icon">🧽</div>
+              <div class="prize-info">
+                <h4>免费精洗服务</h4>
+                <p>来源: 签到奖励 · 有效期至 2025-02-28</p>
+              </div>
+              <span class="prize-status pending">待核销</span>
+            </div>
+            <div class="prize-item">
+              <div class="prize-icon">🎁</div>
+              <div class="prize-info">
+                <h4>精美车载香薰</h4>
+                <p>来源: 积分兑换 · 已于 2025-01-02 核销</p>
+              </div>
+              <span class="prize-status used">已核销</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="section">
+          <div class="section-header">
+            <h3 class="section-title">活动记录</h3>
+          </div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <h4 class="timeline-title">参与签到活动</h4>
+                <p class="timeline-desc">获得 10 积分奖励</p>
+                <span class="timeline-time">2025-01-05 09:32</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <h4 class="timeline-title">扭蛋抽奖</h4>
+                <p class="timeline-desc">中奖：500元保养券</p>
+                <span class="timeline-time">2025-01-02 14:32</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <h4 class="timeline-title">邀请好友注册</h4>
+                <p class="timeline-desc">成功邀请用户李女士</p>
+                <span class="timeline-time">2024-12-28 16:45</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remark Section -->
+        <div class="section">
+          <div class="section-header">
+            <h3 class="section-title">客户备注</h3>
+          </div>
+          <div class="remark-card">
+            <p class="remark-label">备注信息</p>
+            <p class="remark-content">客户车型：宝马3系 2024款，常做保养服务，对服务品质要求较高，喜欢预约下午时段。</p>
+            <span class="edit-remark">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              编辑备注
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

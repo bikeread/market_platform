@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 幸运大转盘</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .wheel-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative Background */
+    .bg-decoration {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-gold) 0%, transparent 70%);
+      opacity: 0.1;
+    }
+
+    .bg-circle-1 {
+      width: 400px;
+      height: 400px;
+      top: 10%;
+      left: -20%;
+    }
+
+    .bg-circle-2 {
+      width: 300px;
+      height: 300px;
+      bottom: 20%;
+      right: -15%;
+    }
+
+    /* Floating particles */
+    .sparkle {
+      position: absolute;
+      font-size: 12px;
+      opacity: 0;
+      animation: sparkle 3s ease-in-out infinite;
+    }
+
+    .sparkle:nth-child(1) { left: 10%; top: 15%; animation-delay: 0s; }
+    .sparkle:nth-child(2) { left: 85%; top: 20%; animation-delay: 0.5s; }
+    .sparkle:nth-child(3) { left: 15%; top: 75%; animation-delay: 1s; }
+    .sparkle:nth-child(4) { left: 80%; top: 70%; animation-delay: 1.5s; }
+    .sparkle:nth-child(5) { left: 50%; top: 8%; animation-delay: 2s; }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    }
+
+    /* Content */
+    .wheel-content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .wheel-header {
+      text-align: center;
+      padding: 16px 24px 0;
+      animation: slideDown 0.6s ease forwards;
+    }
+
+    .wheel-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-gold), #FFE066, var(--accent-gold));
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .wheel-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Wheel Container */
+    .wheel-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Wheel Wrapper */
+    .wheel-wrapper {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      animation: scaleIn 0.6s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    /* Outer Ring */
+    .wheel-outer-ring {
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      width: 330px;
+      height: 330px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4A4A4C, #2C2C2E);
+      box-shadow:
+        0 0 0 4px #5A5A5C,
+        0 0 40px rgba(255, 214, 10, 0.2),
+        inset 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Light Bulbs */
+    .wheel-lights {
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      width: 330px;
+      height: 330px;
+    }
+
+    .light-bulb {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      box-shadow: 0 0 8px var(--accent-gold);
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    .light-bulb:nth-child(odd) {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent-gold); }
+      50% { opacity: 0.3; box-shadow: 0 0 2px var(--accent-gold); }
+    }
+
+    /* Main Wheel */
+    .wheel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      overflow: hidden;
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .wheel.spinning {
+      transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+    }
+
+    /* Wheel Segments */
+    .wheel-segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      top: 0;
+      right: 0;
+      transform-origin: 0% 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wheel-segment::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      transform-origin: 0% 100%;
+      transform: rotate(-22.5deg) skewY(-45deg);
+    }
+
+    .segment-content {
+      position: absolute;
+      top: 20%;
+      left: 5%;
+      transform: rotate(67.5deg);
+      text-align: center;
+      width: 70px;
+    }
+
+    .segment-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .segment-text {
+      font-size: 10px;
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.2;
+    }
+
+    /* Segment Colors */
+    .wheel-segment:nth-child(1) { transform: rotate(0deg); }
+    .wheel-segment:nth-child(1)::before { background: linear-gradient(135deg, #FF6B6B, #FF4757); }
+
+    .wheel-segment:nth-child(2) { transform: rotate(45deg); }
+    .wheel-segment:nth-child(2)::before { background: linear-gradient(135deg, #FFD93D, #F1C40F); }
+
+    .wheel-segment:nth-child(3) { transform: rotate(90deg); }
+    .wheel-segment:nth-child(3)::before { background: linear-gradient(135deg, #6BCB77, #2ECC71); }
+
+    .wheel-segment:nth-child(4) { transform: rotate(135deg); }
+    .wheel-segment:nth-child(4)::before { background: linear-gradient(135deg, #4ECDC4, #45B7D1); }
+
+    .wheel-segment:nth-child(5) { transform: rotate(180deg); }
+    .wheel-segment:nth-child(5)::before { background: linear-gradient(135deg, #FF6B6B, #FF4757); }
+
+    .wheel-segment:nth-child(6) { transform: rotate(225deg); }
+    .wheel-segment:nth-child(6)::before { background: linear-gradient(135deg, #FFD93D, #F1C40F); }
+
+    .wheel-segment:nth-child(7) { transform: rotate(270deg); }
+    .wheel-segment:nth-child(7)::before { background: linear-gradient(135deg, #6BCB77, #2ECC71); }
+
+    .wheel-segment:nth-child(8) { transform: rotate(315deg); }
+    .wheel-segment:nth-child(8)::before { background: linear-gradient(135deg, #4ECDC4, #45B7D1); }
+
+    /* Center Button */
+    .wheel-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-gold), #D4A600);
+      box-shadow:
+        0 4px 20px rgba(255, 214, 10, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: transform 0.2s ease;
+    }
+
+    .wheel-center:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .wheel-center:active {
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    .wheel-center-text {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Pointer */
+    .wheel-pointer {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .wheel-pointer svg {
+      width: 40px;
+      height: 50px;
+    }
+
+    /* Chances Display */
+    .chances-display {
+      text-align: center;
+      margin-top: 24px;
+      animation: fadeIn 0.6s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .chances-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .chances-value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .chance-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      box-shadow: 0 0 8px rgba(255, 214, 10, 0.5);
+    }
+
+    .chance-dot.used {
+      background: var(--bg-tertiary);
+      box-shadow: none;
+    }
+
+    .chances-text {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-left: 8px;
+    }
+
+    /* Prize Pool */
+    .prize-pool {
+      padding: 20px 16px;
+      animation: slideUp 0.6s ease 0.5s forwards;
+      opacity: 0;
+    }
+
+    .prize-pool-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .prize-pool-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prize-pool-title::before {
+      content: '🎁';
+    }
+
+    .prize-pool-more {
+      font-size: 13px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .prize-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .prize-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .prize-mini-card {
+      min-width: 100px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+    }
+
+    .prize-mini-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .prize-mini-name {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .prize-mini-card.grand {
+      border-color: var(--accent-gold);
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.1), transparent);
+    }
+
+    .prize-mini-card.grand .prize-mini-name {
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    /* Bottom Actions */
+    .bottom-actions {
+      padding: 0 16px 24px;
+      display: flex;
+      gap: 12px;
+      animation: slideUp 0.6s ease 0.6s forwards;
+      opacity: 0;
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .action-btn:hover {
+      background: var(--glass-border);
+      color: var(--text-primary);
+    }
+
+    /* Rules Button */
+    .rules-btn {
+      position: absolute;
+      top: 56px;
+      right: 16px;
+      padding: 6px 12px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    /* Result Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      width: 300px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transform: scale(0.8);
+      transition: var(--transition-normal);
+      text-align: center;
+    }
+
+    .modal-overlay.show .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 32px 24px 16px;
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.05));
+    }
+
+    .modal-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: bounce 1s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-prize-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal-prize-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .modal-btn.primary {
+      background: linear-gradient(135deg, var(--accent-gold), #D4A600);
+      border: none;
+      color: #1a1a1a;
+    }
+
+    .modal-btn.secondary {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="wheel-screen">
+        <!-- Decorative Background -->
+        <div class="bg-decoration">
+          <div class="bg-circle bg-circle-1"></div>
+          <div class="bg-circle bg-circle-2"></div>
+          <span class="sparkle">✨</span>
+          <span class="sparkle">⭐</span>
+          <span class="sparkle">✨</span>
+          <span class="sparkle">⭐</span>
+          <span class="sparkle">✨</span>
+        </div>
+
+        <div class="wheel-content">
+          <!-- Status Bar -->
+          <div class="status-bar">
+            <span class="time">9:41</span>
+            <div class="icons">
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+                <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+                <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+                <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+              </svg>
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+                <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+                <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+                <circle cx="8" cy="10" r="2"/>
+              </svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+                <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+                <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+                <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Nav Bar -->
+          <div class="nav-bar">
+            <div class="back-btn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18L9 12L15 6"/>
+              </svg>
+            </div>
+            <span class="title">幸运大转盘</span>
+            <div class="action"></div>
+          </div>
+
+          <!-- Rules Button -->
+          <div class="rules-btn">活动规则</div>
+
+          <!-- Header -->
+          <div class="wheel-header">
+            <h1 class="wheel-title">转动好运 赢取大奖</h1>
+            <p class="wheel-subtitle">每次转动都有惊喜等着你</p>
+          </div>
+
+          <!-- Wheel Container -->
+          <div class="wheel-container">
+            <div class="wheel-wrapper">
+              <!-- Outer Ring -->
+              <div class="wheel-outer-ring"></div>
+
+              <!-- Light Bulbs -->
+              <div class="wheel-lights" id="wheelLights"></div>
+
+              <!-- Main Wheel -->
+              <div class="wheel" id="wheel">
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">🎫</div>
+                    <div class="segment-text">500元<br>保养券</div>
+                  </div>
+                </div>
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">💰</div>
+                    <div class="segment-text">100<br>积分</div>
+                  </div>
+                </div>
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">🧴</div>
+                    <div class="segment-text">精洗<br>服务</div>
+                  </div>
+                </div>
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">🍀</div>
+                    <div class="segment-text">谢谢<br>参与</div>
+                  </div>
+                </div>
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">☕</div>
+                    <div class="segment-text">咖啡券</div>
+                  </div>
+                </div>
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">💰</div>
+                    <div class="segment-text">50<br>积分</div>
+                  </div>
+                </div>
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">🎁</div>
+                    <div class="segment-text">车载<br>香薰</div>
+                  </div>
+                </div>
+                <div class="wheel-segment">
+                  <div class="segment-content">
+                    <div class="segment-icon">🍀</div>
+                    <div class="segment-text">谢谢<br>参与</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pointer -->
+              <div class="wheel-pointer">
+                <svg viewBox="0 0 40 50" fill="none">
+                  <path d="M20 50L0 15L20 0L40 15L20 50Z" fill="url(#pointerGradient)"/>
+                  <defs>
+                    <linearGradient id="pointerGradient" x1="20" y1="0" x2="20" y2="50">
+                      <stop offset="0%" stop-color="#FFD60A"/>
+                      <stop offset="100%" stop-color="#D4A600"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+
+              <!-- Center Button -->
+              <div class="wheel-center" id="spinBtn">
+                <span class="wheel-center-text">开始<br>抽奖</span>
+              </div>
+            </div>
+
+            <!-- Chances Display -->
+            <div class="chances-display">
+              <p class="chances-label">今日剩余抽奖次数</p>
+              <div class="chances-value">
+                <span class="chance-dot"></span>
+                <span class="chance-dot"></span>
+                <span class="chance-dot"></span>
+                <span class="chance-dot used"></span>
+                <span class="chance-dot used"></span>
+                <span class="chances-text">3次</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prize Pool -->
+          <div class="prize-pool">
+            <div class="prize-pool-header">
+              <h3 class="prize-pool-title">奖品池</h3>
+              <span class="prize-pool-more">查看全部</span>
+            </div>
+            <div class="prize-scroll">
+              <div class="prize-mini-card grand">
+                <div class="prize-mini-icon">🎫</div>
+                <div class="prize-mini-name">500元保养券</div>
+              </div>
+              <div class="prize-mini-card">
+                <div class="prize-mini-icon">🧴</div>
+                <div class="prize-mini-name">精洗服务</div>
+              </div>
+              <div class="prize-mini-card">
+                <div class="prize-mini-icon">🎁</div>
+                <div class="prize-mini-name">车载香薰</div>
+              </div>
+              <div class="prize-mini-card">
+                <div class="prize-mini-icon">☕</div>
+                <div class="prize-mini-name">咖啡券</div>
+              </div>
+              <div class="prize-mini-card">
+                <div class="prize-mini-icon">💰</div>
+                <div class="prize-mini-name">积分奖励</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Actions -->
+          <div class="bottom-actions">
+            <div class="action-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              获取次数
+            </div>
+            <div class="action-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 12V22H4V12"/>
+                <path d="M22 7H2V12H22V7Z"/>
+                <path d="M12 22V7"/>
+              </svg>
+              我的奖品
+            </div>
+          </div>
+        </div>
+
+        <!-- Result Modal -->
+        <div class="modal-overlay" id="resultModal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div class="modal-icon" id="modalIcon">🎉</div>
+              <h2 class="modal-title" id="modalTitle">恭喜中奖！</h2>
+            </div>
+            <div class="modal-body">
+              <h3 class="modal-prize-name" id="modalPrizeName">100积分</h3>
+              <p class="modal-prize-desc" id="modalPrizeDesc">积分已自动发放到您的账户</p>
+              <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="hideModal()">查看奖品</button>
+                <button class="modal-btn secondary" onclick="spinAgain()">再转一次</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate light bulbs around the wheel
+    const lightsContainer = document.getElementById('wheelLights');
+    const numLights = 20;
+    const radius = 165;
+
+    for (let i = 0; i < numLights; i++) {
+      const angle = (i / numLights) * 2 * Math.PI - Math.PI / 2;
+      const x = radius + radius * Math.cos(angle) - 5;
+      const y = radius + radius * Math.sin(angle) - 5;
+
+      const light = document.createElement('div');
+      light.className = 'light-bulb';
+      light.style.left = x + 'px';
+      light.style.top = y + 'px';
+      lightsContainer.appendChild(light);
+    }
+
+    // Wheel spinning logic
+    const wheel = document.getElementById('wheel');
+    const spinBtn = document.getElementById('spinBtn');
+    const resultModal = document.getElementById('resultModal');
+
+    const prizes = [
+      { name: '500元保养券', desc: '可用于门店全部保养服务', icon: '🎫' },
+      { name: '100积分', desc: '积分已自动发放到您的账户', icon: '💰' },
+      { name: '精洗服务', desc: '到店即可享受精洗服务', icon: '🧴' },
+      { name: '谢谢参与', desc: '下次运气会更好哦', icon: '🍀' },
+      { name: '咖啡券', desc: '星巴克中杯咖啡兑换券', icon: '☕' },
+      { name: '50积分', desc: '积分已自动发放到您的账户', icon: '💰' },
+      { name: '车载香薰', desc: '请到门店领取奖品', icon: '🎁' },
+      { name: '谢谢参与', desc: '下次运气会更好哦', icon: '🍀' }
+    ];
+
+    let isSpinning = false;
+    let currentRotation = 0;
+    let chances = 3;
+
+    spinBtn.addEventListener('click', function() {
+      if (isSpinning || chances <= 0) return;
+
+      isSpinning = true;
+      wheel.classList.add('spinning');
+
+      // Random prize index (weighted towards non-grand prizes for demo)
+      const prizeIndex = Math.floor(Math.random() * 8);
+
+      // Calculate rotation
+      // Each segment is 45 degrees (360 / 8)
+      // We want to land on prizeIndex
+      const segmentAngle = 45;
+      const targetAngle = 360 - (prizeIndex * segmentAngle) - segmentAngle / 2;
+      const spins = 5; // Number of full rotations
+      const totalRotation = currentRotation + (360 * spins) + targetAngle - (currentRotation % 360);
+
+      currentRotation = totalRotation;
+      wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+      // Update chances
+      chances--;
+      updateChancesDisplay();
+
+      // Show result after spin
+      setTimeout(() => {
+        isSpinning = false;
+        wheel.classList.remove('spinning');
+        showResult(prizes[prizeIndex]);
+      }, 5000);
+    });
+
+    function updateChancesDisplay() {
+      const dots = document.querySelectorAll('.chance-dot');
+      const text = document.querySelector('.chances-text');
+
+      dots.forEach((dot, index) => {
+        if (index < chances) {
+          dot.classList.remove('used');
+        } else {
+          dot.classList.add('used');
+        }
+      });
+
+      text.textContent = chances + '次';
+    }
+
+    function showResult(prize) {
+      document.getElementById('modalIcon').textContent = prize.icon;
+      document.getElementById('modalTitle').textContent = prize.name === '谢谢参与' ? '再接再厉' : '恭喜中奖！';
+      document.getElementById('modalPrizeName').textContent = prize.name;
+      document.getElementById('modalPrizeDesc').textContent = prize.desc;
+      resultModal.classList.add('show');
+    }
+
+    function hideModal() {
+      resultModal.classList.remove('show');
+    }
+
+    function spinAgain() {
+      hideModal();
+      if (chances > 0) {
+        setTimeout(() => {
+          spinBtn.click();
+        }, 300);
+      }
+    }
+  </script>
+</body>
+</html>

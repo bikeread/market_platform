@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 我的奖品</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .prizes-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 40px;
+    }
+
+    /* Status Tabs */
+    .status-tabs {
+      display: flex;
+      padding: 0 16px;
+      gap: 0;
+      background: var(--bg-secondary);
+      margin: 0 16px;
+      border-radius: var(--radius-lg);
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .status-tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition-fast);
+    }
+
+    .status-tab.active {
+      color: var(--primary);
+    }
+
+    .status-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .status-tab .count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 6px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      margin-left: 4px;
+    }
+
+    .status-tab.active .count {
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+
+    /* Prize List */
+    .prize-list {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .prize-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: var(--transition-normal);
+    }
+
+    .prize-card:hover {
+      border-color: var(--primary);
+    }
+
+    .prize-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .prize-image {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      flex-shrink: 0;
+    }
+
+    .prize-info {
+      flex: 1;
+    }
+
+    .prize-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .prize-source {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .prize-validity {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .prize-validity.active {
+      color: var(--accent-green);
+    }
+
+    .prize-validity.expiring {
+      color: var(--accent-orange);
+    }
+
+    .prize-validity.expired {
+      color: var(--text-tertiary);
+    }
+
+    .prize-status-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .prize-status-badge.pending {
+      background: rgba(10, 132, 255, 0.2);
+      color: var(--primary);
+    }
+
+    .prize-status-badge.used {
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+    }
+
+    .prize-status-badge.expired {
+      background: rgba(255, 69, 58, 0.2);
+      color: var(--accent-red);
+    }
+
+    /* QR Code Section */
+    .prize-qr-section {
+      padding: 0 16px 16px;
+      border-top: 1px dashed var(--border-light);
+      margin-top: 0;
+    }
+
+    .qr-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      cursor: pointer;
+    }
+
+    .qr-toggle-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--primary);
+    }
+
+    .qr-toggle-arrow {
+      transition: transform 0.3s ease;
+    }
+
+    .qr-toggle.open .qr-toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .qr-content {
+      display: none;
+      padding-top: 12px;
+    }
+
+    .qr-content.show {
+      display: block;
+    }
+
+    .qr-code-box {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      position: relative;
+    }
+
+    .qr-code-inner {
+      width: 100%;
+      height: 100%;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 8px, #000 8px, #000 10px),
+        repeating-linear-gradient(90deg, transparent, transparent 8px, #000 8px, #000 10px);
+      position: relative;
+    }
+
+    .qr-code-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .qr-code-id {
+      text-align: center;
+      margin-top: 12px;
+      font-family: var(--font-display);
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--text-primary);
+    }
+
+    .qr-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+    }
+
+    .empty-desc {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      margin-bottom: 24px;
+    }
+
+    .empty-btn {
+      padding: 12px 32px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Used/Expired overlay */
+    .prize-card.used .prize-image,
+    .prize-card.expired .prize-image {
+      opacity: 0.5;
+    }
+
+    .prize-card.used,
+    .prize-card.expired {
+      opacity: 0.7;
+    }
+
+    .used-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-15deg);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      border: 3px solid var(--text-tertiary);
+      padding: 4px 16px;
+      border-radius: var(--radius-md);
+      opacity: 0.8;
+    }
+
+    .prize-header {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="prizes-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+              <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+              <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">我的奖品</span>
+          <div class="action"></div>
+        </div>
+
+        <!-- Status Tabs -->
+        <div class="status-tabs">
+          <div class="status-tab active">
+            待核销
+            <span class="count">3</span>
+          </div>
+          <div class="status-tab">
+            已核销
+            <span class="count">5</span>
+          </div>
+          <div class="status-tab">
+            已过期
+            <span class="count">2</span>
+          </div>
+        </div>
+
+        <!-- Prize List - Pending -->
+        <div class="prize-list" id="pendingList">
+          <div class="prize-card">
+            <div class="prize-header">
+              <div class="prize-image">🎫</div>
+              <div class="prize-info">
+                <div class="prize-name">500元保养券</div>
+                <div class="prize-source">来源: 幸运扭蛋</div>
+                <div class="prize-validity active">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  有效期至 2025-03-31
+                </div>
+              </div>
+            </div>
+            <div class="prize-qr-section">
+              <div class="qr-toggle" onclick="toggleQR(this)">
+                <span class="qr-toggle-text">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                  </svg>
+                  点击查看核销码
+                </span>
+                <svg class="qr-toggle-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="qr-content">
+                <div class="qr-code-box">
+                  <div class="qr-code-inner">
+                    <div class="qr-code-center">F</div>
+                  </div>
+                </div>
+                <div class="qr-code-id">A8B2C4D6</div>
+                <div class="qr-hint">请向门店工作人员出示此码</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="prize-card">
+            <div class="prize-header">
+              <div class="prize-image">🧴</div>
+              <div class="prize-info">
+                <div class="prize-name">精洗服务券</div>
+                <div class="prize-source">来源: 积分兑换</div>
+                <div class="prize-validity expiring">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  即将过期: 还剩7天
+                </div>
+              </div>
+            </div>
+            <div class="prize-qr-section">
+              <div class="qr-toggle" onclick="toggleQR(this)">
+                <span class="qr-toggle-text">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                  </svg>
+                  点击查看核销码
+                </span>
+                <svg class="qr-toggle-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="qr-content">
+                <div class="qr-code-box">
+                  <div class="qr-code-inner">
+                    <div class="qr-code-center">F</div>
+                  </div>
+                </div>
+                <div class="qr-code-id">X7Y9Z1W3</div>
+                <div class="qr-hint">请向门店工作人员出示此码</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="prize-card">
+            <div class="prize-header">
+              <div class="prize-image">☕</div>
+              <div class="prize-info">
+                <div class="prize-name">星巴克咖啡券</div>
+                <div class="prize-source">来源: 签到奖励</div>
+                <div class="prize-validity active">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  有效期至 2025-02-28
+                </div>
+              </div>
+            </div>
+            <div class="prize-qr-section">
+              <div class="qr-toggle" onclick="toggleQR(this)">
+                <span class="qr-toggle-text">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                  </svg>
+                  点击查看核销码
+                </span>
+                <svg class="qr-toggle-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="qr-content">
+                <div class="qr-code-box">
+                  <div class="qr-code-inner">
+                    <div class="qr-code-center">F</div>
+                  </div>
+                </div>
+                <div class="qr-code-id">M5N7P2Q4</div>
+                <div class="qr-hint">请向门店工作人员出示此码</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prize List - Used (hidden by default) -->
+        <div class="prize-list" id="usedList" style="display: none;">
+          <div class="prize-card used">
+            <div class="prize-header">
+              <div class="prize-image">🎁</div>
+              <div class="prize-info">
+                <div class="prize-name">洗车服务券</div>
+                <div class="prize-source">来源: 幸运扭蛋</div>
+                <div class="prize-validity">
+                  已于 2025-01-02 核销
+                </div>
+              </div>
+              <div class="used-stamp">已使用</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State (hidden by default) -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-icon">🎁</div>
+          <h3 class="empty-title">暂无奖品</h3>
+          <p class="empty-desc">参与活动获取更多奖品吧</p>
+          <button class="empty-btn">去参与活动</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleQR(element) {
+      element.classList.toggle('open');
+      const content = element.nextElementSibling;
+      content.classList.toggle('show');
+    }
+
+    // Tab switching
+    document.querySelectorAll('.status-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelector('.status-tab.active').classList.remove('active');
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

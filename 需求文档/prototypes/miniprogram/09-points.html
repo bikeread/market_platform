@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 我的积分</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .points-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Points Header - 简化 */
+    .points-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      padding: 20px 15px;
+      margin: 0 15px;
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .points-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 8px;
+    }
+
+    .points-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .points-value span {
+      font-size: 16px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    .expiring-notice {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      background: rgba(255, 159, 10, 0.2);
+      border-radius: var(--radius-md);
+      margin-top: 16px;
+    }
+
+    .expiring-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--accent-orange);
+    }
+
+    .expiring-text {
+      font-size: 13px;
+      color: var(--accent-orange);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 20px 16px;
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .action-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 8px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .action-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .action-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .action-icon.checkin {
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.2), rgba(48, 209, 88, 0.1));
+    }
+
+    .action-icon.task {
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(10, 132, 255, 0.1));
+    }
+
+    .action-icon.detail {
+      background: linear-gradient(135deg, rgba(255, 159, 10, 0.2), rgba(255, 159, 10, 0.1));
+    }
+
+    .action-icon.exchange {
+      background: linear-gradient(135deg, rgba(255, 69, 58, 0.2), rgba(255, 69, 58, 0.1));
+    }
+
+    .action-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Section Title */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      padding: 0 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    /* Points Tasks */
+    .tasks-section {
+      padding: 0 16px;
+      margin-bottom: 24px;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+    }
+
+    .task-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .task-icon.daily {
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.2), rgba(48, 209, 88, 0.1));
+    }
+
+    .task-icon.invite {
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(10, 132, 255, 0.1));
+    }
+
+    .task-icon.share {
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1));
+    }
+
+    .task-info {
+      flex: 1;
+    }
+
+    .task-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .task-reward {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .task-reward span {
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    .task-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .progress-bar-mini {
+      flex: 1;
+      height: 4px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-fill-mini {
+      height: 100%;
+      background: var(--primary);
+      border-radius: var(--radius-full);
+    }
+
+    .progress-text {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .task-btn {
+      padding: 10px 16px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition-fast);
+    }
+
+    .task-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .task-btn.completed {
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+    }
+
+    /* Tips Section */
+    .tips-section {
+      padding: 0 16px;
+      animation: slideUp 0.5s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .tips-card {
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.1), rgba(255, 214, 10, 0.05));
+      border: 1px solid var(--accent-gold);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .tips-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tips-icon {
+      font-size: 24px;
+    }
+
+    .tips-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent-gold);
+    }
+
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tip-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tip-badge {
+      width: 24px;
+      height: 24px;
+      background: var(--accent-gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a1a1a;
+      flex-shrink: 0;
+    }
+
+    .tip-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .tip-text span {
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    /* Recent Records Preview */
+    .records-preview {
+      padding: 24px 16px 0;
+      animation: slideUp 0.5s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .records-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .view-all {
+      font-size: 13px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .record-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .record-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .record-info h4 {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .record-info p {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .record-amount {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .record-amount.positive {
+      color: var(--accent-green);
+    }
+
+    .record-amount.negative {
+      color: var(--accent-red);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="points-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+              <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+              <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">我的积分</span>
+          <div class="action"></div>
+        </div>
+
+        <!-- Points Header -->
+        <div class="points-header">
+          <div class="header-content">
+            <p class="points-label">可用积分</p>
+            <h1 class="points-value">2,580 <span>分</span></h1>
+
+            <div class="expiring-notice">
+              <svg class="expiring-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span class="expiring-text">180积分将于30天后过期</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <div class="action-item">
+            <div class="action-icon checkin">📅</div>
+            <span class="action-name">每日签到</span>
+          </div>
+          <div class="action-item">
+            <div class="action-icon task">🎯</div>
+            <span class="action-name">积分任务</span>
+          </div>
+          <div class="action-item">
+            <div class="action-icon detail">📊</div>
+            <span class="action-name">积分明细</span>
+          </div>
+          <div class="action-item">
+            <div class="action-icon exchange">🎁</div>
+            <span class="action-name">积分兑换</span>
+          </div>
+        </div>
+
+        <!-- Tasks Section -->
+        <div class="tasks-section">
+          <h2 class="section-title">赚取积分</h2>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="task-icon daily">📅</div>
+              <div class="task-info">
+                <div class="task-name">每日签到</div>
+                <div class="task-reward">每日可获得 <span>+10</span> 积分</div>
+              </div>
+              <button class="task-btn active">去签到</button>
+            </div>
+            <div class="task-item">
+              <div class="task-icon invite">👥</div>
+              <div class="task-info">
+                <div class="task-name">邀请好友</div>
+                <div class="task-reward">每邀请1人 <span>+50</span> 积分</div>
+                <div class="task-progress">
+                  <div class="progress-bar-mini">
+                    <div class="progress-fill-mini" style="width: 30%"></div>
+                  </div>
+                  <span class="progress-text">3/10</span>
+                </div>
+              </div>
+              <button class="task-btn active">去邀请</button>
+            </div>
+            <div class="task-item">
+              <div class="task-icon share">🔗</div>
+              <div class="task-info">
+                <div class="task-name">分享活动</div>
+                <div class="task-reward">分享活动 <span>+5</span> 积分</div>
+              </div>
+              <button class="task-btn completed">已完成</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="tips-section">
+          <div class="tips-card">
+            <div class="tips-header">
+              <span class="tips-icon">💡</span>
+              <h3 class="tips-title">积分获取攻略</h3>
+            </div>
+            <div class="tips-list">
+              <div class="tip-item">
+                <span class="tip-badge">1</span>
+                <span class="tip-text">连续签到7天，额外奖励 <span>100积分</span></span>
+              </div>
+              <div class="tip-item">
+                <span class="tip-badge">2</span>
+                <span class="tip-text">邀请好友注册，双方各得 <span>50积分</span></span>
+              </div>
+              <div class="tip-item">
+                <span class="tip-badge">3</span>
+                <span class="tip-text">参与门店活动，积分 <span>翻倍</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Records -->
+        <div class="records-preview">
+          <div class="records-header">
+            <h2 class="section-title">最近记录</h2>
+            <span class="view-all">查看全部</span>
+          </div>
+
+          <div class="record-list">
+            <div class="record-item">
+              <div class="record-info">
+                <h4>每日签到</h4>
+                <p>2025-01-06 09:30</p>
+              </div>
+              <span class="record-amount positive">+10</span>
+            </div>
+            <div class="record-item">
+              <div class="record-info">
+                <h4>积分兑换</h4>
+                <p>2025-01-05 14:22</p>
+              </div>
+              <span class="record-amount negative">-500</span>
+            </div>
+            <div class="record-item">
+              <div class="record-info">
+                <h4>邀请好友</h4>
+                <p>2025-01-04 18:15</p>
+              </div>
+              <span class="record-amount positive">+50</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

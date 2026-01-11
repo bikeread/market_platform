@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 积分规则</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .desktop-frame {
+      display: flex;
+    }
+
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+    }
+
+    .settings-nav {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      height: fit-content;
+      animation: slideLeft 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    .settings-nav-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 12px 12px;
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      margin-bottom: 4px;
+    }
+
+    .settings-nav-item:hover {
+      background: var(--glass-bg);
+    }
+
+    .settings-nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .settings-content {
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+    }
+
+    .settings-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-card-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .settings-card-body {
+      padding: 24px;
+    }
+
+    /* Rules Grid */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .rule-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      transition: var(--transition-fast);
+    }
+
+    .rule-card:hover {
+      border-color: var(--primary);
+    }
+
+    .rule-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .rule-icon.blue { background: var(--primary-light); }
+    .rule-icon.green { background: rgba(48, 209, 88, 0.15); }
+    .rule-icon.orange { background: rgba(255, 159, 10, 0.15); }
+    .rule-icon.purple { background: rgba(191, 90, 242, 0.15); }
+    .rule-icon.gold { background: rgba(255, 214, 10, 0.15); }
+
+    .rule-content {
+      flex: 1;
+    }
+
+    .rule-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .rule-desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .rule-value {
+      text-align: right;
+    }
+
+    .rule-value .points {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .rule-value .unit {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .rule-toggle {
+      width: 40px;
+      height: 24px;
+      background: var(--border-color);
+      border-radius: var(--radius-full);
+      position: relative;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .rule-toggle.active {
+      background: var(--accent-green);
+    }
+
+    .rule-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: var(--transition-fast);
+    }
+
+    .rule-toggle.active::after {
+      left: 18px;
+    }
+
+    /* Expiry Settings */
+    .expiry-section {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+    }
+
+    .expiry-option {
+      flex: 1;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-align: center;
+    }
+
+    .expiry-option:hover {
+      border-color: var(--primary);
+    }
+
+    .expiry-option.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .expiry-option .icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .expiry-option h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .expiry-option p {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* Exchange Rules */
+    .exchange-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .exchange-table th,
+    .exchange-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .exchange-table th {
+      background: var(--bg-tertiary);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .exchange-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .exchange-rate {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-frame">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🚗</div>
+          <div class="logo-text">
+            Fuint
+            <span>管理后台</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">概览</div>
+          <div class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">数据看板</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">商户管理</div>
+          <div class="nav-item">
+            <span class="icon">🏢</span>
+            <span class="label">商家列表</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🏪</span>
+            <span class="label">门店管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">审核中心</div>
+          <div class="nav-item">
+            <span class="icon">📋</span>
+            <span class="label">活动审核</span>
+            <span class="badge">5</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎁</span>
+            <span class="label">奖品审核</span>
+            <span class="badge">3</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">活动配置</div>
+          <div class="nav-item">
+            <span class="icon">📅</span>
+            <span class="label">签到设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎰</span>
+            <span class="label">抽奖设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">👥</span>
+            <span class="label">裂变设置</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">系统设置</div>
+          <div class="nav-item">
+            <span class="icon">⭐</span>
+            <span class="label">会员等级</span>
+          </div>
+          <div class="nav-item active">
+            <span class="icon">💎</span>
+            <span class="label">积分规则</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">⚙️</span>
+            <span class="label">系统设置</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">管</div>
+          <div class="user-info">
+            <div class="user-name">管理员</div>
+            <div class="user-role">超级管理员</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title">积分规则</h1>
+          <div class="breadcrumb">
+            <a href="#">首页</a>
+            <span>/</span>
+            <span>系统设置</span>
+            <span>/</span>
+            <span>积分规则</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="settings-layout">
+          <div class="settings-nav">
+            <div class="settings-nav-title">积分设置</div>
+            <div class="settings-nav-item active">
+              <span class="icon">💰</span>
+              获取规则
+            </div>
+            <div class="settings-nav-item">
+              <span class="icon">🔄</span>
+              兑换规则
+            </div>
+            <div class="settings-nav-item">
+              <span class="icon">⏰</span>
+              过期规则
+            </div>
+            <div class="settings-nav-item">
+              <span class="icon">📊</span>
+              积分统计
+            </div>
+          </div>
+
+          <div class="settings-content">
+            <!-- Earn Rules -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h3 class="settings-card-title">积分获取规则</h3>
+              </div>
+              <div class="settings-card-body">
+                <div class="rules-grid">
+                  <div class="rule-card">
+                    <div class="rule-icon blue">📅</div>
+                    <div class="rule-content">
+                      <h4 class="rule-name">每日签到</h4>
+                      <p class="rule-desc">每日签到可获得积分奖励</p>
+                    </div>
+                    <div class="rule-value">
+                      <span class="points">+10</span>
+                      <span class="unit">积分</span>
+                    </div>
+                    <div class="rule-toggle active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+
+                  <div class="rule-card">
+                    <div class="rule-icon green">💳</div>
+                    <div class="rule-content">
+                      <h4 class="rule-name">消费返积分</h4>
+                      <p class="rule-desc">消费每满1元返还积分</p>
+                    </div>
+                    <div class="rule-value">
+                      <span class="points">+1</span>
+                      <span class="unit">积分/元</span>
+                    </div>
+                    <div class="rule-toggle active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+
+                  <div class="rule-card">
+                    <div class="rule-icon orange">👥</div>
+                    <div class="rule-content">
+                      <h4 class="rule-name">邀请好友</h4>
+                      <p class="rule-desc">成功邀请好友注册</p>
+                    </div>
+                    <div class="rule-value">
+                      <span class="points">+50</span>
+                      <span class="unit">积分/人</span>
+                    </div>
+                    <div class="rule-toggle active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+
+                  <div class="rule-card">
+                    <div class="rule-icon purple">📝</div>
+                    <div class="rule-content">
+                      <h4 class="rule-name">完善资料</h4>
+                      <p class="rule-desc">首次完善个人资料</p>
+                    </div>
+                    <div class="rule-value">
+                      <span class="points">+100</span>
+                      <span class="unit">积分</span>
+                    </div>
+                    <div class="rule-toggle active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+
+                  <div class="rule-card">
+                    <div class="rule-icon gold">⭐</div>
+                    <div class="rule-content">
+                      <h4 class="rule-name">服务评价</h4>
+                      <p class="rule-desc">完成服务后进行评价</p>
+                    </div>
+                    <div class="rule-value">
+                      <span class="points">+20</span>
+                      <span class="unit">积分/次</span>
+                    </div>
+                    <div class="rule-toggle active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+
+                  <div class="rule-card">
+                    <div class="rule-icon blue">🎂</div>
+                    <div class="rule-content">
+                      <h4 class="rule-name">生日礼包</h4>
+                      <p class="rule-desc">会员生日当天赠送积分</p>
+                    </div>
+                    <div class="rule-value">
+                      <span class="points">+200</span>
+                      <span class="unit">积分</span>
+                    </div>
+                    <div class="rule-toggle active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Expiry Rules -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h3 class="settings-card-title">积分过期规则</h3>
+              </div>
+              <div class="settings-card-body">
+                <div class="expiry-section">
+                  <div class="expiry-option">
+                    <div class="icon">♾️</div>
+                    <h4>永不过期</h4>
+                    <p>积分永久有效</p>
+                  </div>
+                  <div class="expiry-option active">
+                    <div class="icon">📅</div>
+                    <h4>年度清零</h4>
+                    <p>每年12月31日清零</p>
+                  </div>
+                  <div class="expiry-option">
+                    <div class="icon">⏰</div>
+                    <h4>滚动过期</h4>
+                    <p>获得后12个月过期</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exchange Rules -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h3 class="settings-card-title">积分兑换比例</h3>
+              </div>
+              <div class="settings-card-body">
+                <table class="exchange-table">
+                  <thead>
+                    <tr>
+                      <th>兑换类型</th>
+                      <th>兑换比例</th>
+                      <th>状态</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>积分抵扣现金</td>
+                      <td><span class="exchange-rate">100积分 = ¥1</span></td>
+                      <td><span class="status-badge active"><span class="dot"></span>已启用</span></td>
+                      <td>
+                        <button class="action-btn">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>积分兑换抽奖次数</td>
+                      <td><span class="exchange-rate">100积分 = 1次</span></td>
+                      <td><span class="status-badge active"><span class="dot"></span>已启用</span></td>
+                      <td>
+                        <button class="action-btn">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>积分兑换礼品</td>
+                      <td><span class="exchange-rate">按礼品设置</span></td>
+                      <td><span class="status-badge active"><span class="dot"></span>已启用</span></td>
+                      <td>
+                        <button class="action-btn">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="settings-actions">
+                <button class="btn btn-secondary">重置</button>
+                <button class="btn btn-primary">保存设置</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

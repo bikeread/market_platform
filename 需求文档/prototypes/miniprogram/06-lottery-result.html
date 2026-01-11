@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 抽奖结果</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .result-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Celebration Background */
+    .celebration-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+      animation: confettiFall 4s ease-out forwards;
+    }
+
+    .confetti:nth-child(1) { left: 10%; background: var(--accent-gold); animation-delay: 0s; }
+    .confetti:nth-child(2) { left: 20%; background: var(--accent-red); animation-delay: 0.2s; }
+    .confetti:nth-child(3) { left: 30%; background: var(--accent-green); animation-delay: 0.4s; }
+    .confetti:nth-child(4) { left: 40%; background: var(--primary); animation-delay: 0.1s; }
+    .confetti:nth-child(5) { left: 50%; background: var(--accent-orange); animation-delay: 0.3s; }
+    .confetti:nth-child(6) { left: 60%; background: var(--accent-gold); animation-delay: 0.5s; }
+    .confetti:nth-child(7) { left: 70%; background: var(--accent-red); animation-delay: 0.15s; }
+    .confetti:nth-child(8) { left: 80%; background: var(--primary); animation-delay: 0.35s; }
+    .confetti:nth-child(9) { left: 90%; background: var(--accent-green); animation-delay: 0.25s; }
+    .confetti:nth-child(10) { left: 15%; background: var(--accent-orange); animation-delay: 0.45s; }
+
+    @keyframes confettiFall {
+      0% {
+        top: -10%;
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+      }
+      100% {
+        top: 100%;
+        opacity: 0;
+        transform: rotate(720deg) scale(0.5);
+      }
+    }
+
+    /* Glow Effect */
+    .glow-circle {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, var(--accent-gold) 0%, transparent 70%);
+      opacity: 0.2;
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.2; }
+      50% { transform: translateX(-50%) scale(1.2); opacity: 0.3; }
+    }
+
+    /* Content */
+    .result-content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 0 24px;
+    }
+
+    /* Win State */
+    .win-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .win-badge {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--primary-light));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+      box-shadow: 0 0 60px rgba(255, 214, 10, 0.4);
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .win-badge-icon {
+      font-size: 56px;
+    }
+
+    .win-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      animation: slideUp 0.5s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .win-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      animation: slideUp 0.5s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    /* Prize Card */
+    .prize-card {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.15), rgba(255, 214, 10, 0.05));
+      border: 2px solid var(--accent-gold);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      text-align: center;
+      animation: scaleIn 0.5s ease 0.5s forwards;
+      opacity: 0;
+    }
+
+    .prize-image {
+      width: 100px;
+      height: 100px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+    }
+
+    .prize-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--accent-gold);
+    }
+
+    .prize-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .prize-validity {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      padding: 32px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: slideUp 0.5s ease 0.6s forwards;
+      opacity: 0;
+    }
+
+    .btn-view-prize {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--primary-light));
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      box-shadow: 0 8px 24px rgba(255, 214, 10, 0.3);
+    }
+
+    .btn-view-prize:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(255, 214, 10, 0.4);
+    }
+
+    .btn-draw-again {
+      width: 100%;
+      padding: 18px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .btn-draw-again:hover {
+      background: var(--border-light);
+    }
+
+    /* Lose State */
+    .lose-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      display: none;
+    }
+
+    .lose-icon {
+      width: 120px;
+      height: 120px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      font-size: 56px;
+    }
+
+    .lose-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+    }
+
+    .lose-subtitle {
+      font-size: 15px;
+      color: var(--text-tertiary);
+      margin-bottom: 40px;
+      max-width: 260px;
+      line-height: 1.6;
+    }
+
+    .lose-actions {
+      width: 100%;
+    }
+
+    .btn-try-again {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      box-shadow: var(--shadow-glow);
+      margin-bottom: 12px;
+    }
+
+    .btn-try-again:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-back-home {
+      width: 100%;
+      padding: 18px;
+      background: transparent;
+      border: none;
+      font-size: 15px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+    }
+
+    /* Stars decoration */
+    .stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      font-size: 20px;
+      opacity: 0;
+      animation: starAppear 1s ease forwards;
+    }
+
+    .star:nth-child(1) { top: 15%; left: 15%; animation-delay: 0.8s; }
+    .star:nth-child(2) { top: 25%; left: 85%; animation-delay: 1s; }
+    .star:nth-child(3) { top: 35%; left: 10%; animation-delay: 1.2s; }
+    .star:nth-child(4) { top: 20%; left: 75%; animation-delay: 0.9s; }
+
+    @keyframes starAppear {
+      0% { transform: scale(0) rotate(0); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: scale(1) rotate(180deg); opacity: 0.6; }
+    }
+
+    /* Toggle for demo */
+    .demo-toggle {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="result-screen">
+        <!-- Celebration Background (Win) -->
+        <div class="celebration-bg" id="celebrationBg">
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+          <div class="confetti"></div>
+        </div>
+
+        <div class="glow-circle" id="glowCircle"></div>
+
+        <!-- Stars -->
+        <div class="stars" id="stars">
+          <span class="star">✨</span>
+          <span class="star">⭐</span>
+          <span class="star">✨</span>
+          <span class="star">⭐</span>
+        </div>
+
+        <div class="result-content">
+          <!-- Status Bar -->
+          <div class="status-bar">
+            <span class="time">9:41</span>
+            <div class="icons">
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+                <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+                <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+                <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+              </svg>
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+                <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+                <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+                <circle cx="8" cy="10" r="2"/>
+              </svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+                <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+                <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+                <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Win Section -->
+          <div class="win-section" id="winSection">
+            <div class="win-badge">
+              <span class="win-badge-icon">🎉</span>
+            </div>
+            <h1 class="win-title">恭喜中奖！</h1>
+            <p class="win-subtitle">幸运之神眷顾了您</p>
+
+            <div class="prize-card">
+              <div class="prize-image">🎫</div>
+              <h2 class="prize-name">500元保养券</h2>
+              <p class="prize-desc">可用于门店全部保养服务</p>
+              <div class="prize-validity">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                有效期至 2025-03-31
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn-view-prize">立即查看奖品</button>
+              <button class="btn-draw-again">再抽一次</button>
+            </div>
+          </div>
+
+          <!-- Lose Section -->
+          <div class="lose-section" id="loseSection">
+            <div class="lose-icon">😔</div>
+            <h1 class="lose-title">差一点点...</h1>
+            <p class="lose-subtitle">运气稍欠，不要气馁，再试一次说不定就能中奖哦！</p>
+
+            <div class="lose-actions">
+              <button class="btn-try-again">再抽一次</button>
+              <button class="btn-back-home">返回首页</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo Toggle -->
+        <div class="demo-toggle" onclick="toggleResult()">切换中奖/未中奖状态</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isWin = true;
+
+    function toggleResult() {
+      isWin = !isWin;
+      const winSection = document.getElementById('winSection');
+      const loseSection = document.getElementById('loseSection');
+      const celebrationBg = document.getElementById('celebrationBg');
+      const glowCircle = document.getElementById('glowCircle');
+      const stars = document.getElementById('stars');
+
+      if (isWin) {
+        winSection.style.display = 'flex';
+        loseSection.style.display = 'none';
+        celebrationBg.style.display = 'block';
+        glowCircle.style.display = 'block';
+        stars.style.display = 'block';
+      } else {
+        winSection.style.display = 'none';
+        loseSection.style.display = 'flex';
+        celebrationBg.style.display = 'none';
+        glowCircle.style.display = 'none';
+        stars.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

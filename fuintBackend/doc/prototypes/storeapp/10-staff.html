@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 员工管理</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .staff-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Stats Overview */
+    .stats-overview {
+      display: flex;
+      gap: 12px;
+      padding: 0 16px 20px;
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+    }
+
+    .stat-card .value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* Add Staff Button */
+    .add-staff-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0 16px 20px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(10, 132, 255, 0.05));
+      border: 1px dashed var(--primary);
+      border-radius: var(--radius-lg);
+      color: var(--primary);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      animation: fadeIn 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    /* Staff List */
+    .staff-section {
+      padding: 0 16px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .staff-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      animation: slideUp 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    .staff-card:nth-child(1) { animation-delay: 0.15s; }
+    .staff-card:nth-child(2) { animation-delay: 0.2s; }
+    .staff-card:nth-child(3) { animation-delay: 0.25s; }
+    .staff-card:nth-child(4) { animation-delay: 0.3s; }
+
+    .staff-main {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .staff-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .staff-avatar.manager {
+      background: linear-gradient(135deg, var(--accent-gold), #D4A600);
+    }
+
+    .staff-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .staff-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .staff-name h4 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .role-tag {
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .role-tag.manager {
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1));
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    .role-tag.staff {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+    }
+
+    .staff-phone {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .staff-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+    }
+
+    .staff-status.online {
+      background: rgba(48, 209, 88, 0.15);
+      color: var(--accent-green);
+    }
+
+    .staff-status.offline {
+      background: rgba(99, 99, 102, 0.15);
+      color: var(--text-tertiary);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-dot.online {
+      background: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.offline {
+      background: var(--text-tertiary);
+    }
+
+    /* Staff Stats */
+    .staff-stats {
+      display: flex;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .staff-stat {
+      flex: 1;
+      text-align: center;
+    }
+
+    .staff-stat .value {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .staff-stat .label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Staff Actions */
+    .staff-actions {
+      display: flex;
+      padding: 0 16px 16px;
+      gap: 12px;
+    }
+
+    .staff-action {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      background: var(--glass-bg);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .staff-action:hover {
+      background: var(--glass-border);
+    }
+
+    /* Invite Section */
+    .invite-section {
+      margin: 20px 16px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(10, 132, 255, 0.05));
+      border: 1px solid rgba(10, 132, 255, 0.3);
+      border-radius: var(--radius-xl);
+      animation: slideUp 0.5s ease 0.35s forwards;
+      opacity: 0;
+    }
+
+    .invite-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .invite-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .invite-text h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .invite-text p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .invite-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="staff-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">员工管理</span>
+          <div class="action"></div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+          <div class="stat-card">
+            <div class="value">4</div>
+            <div class="label">总员工数</div>
+          </div>
+          <div class="stat-card">
+            <div class="value">3</div>
+            <div class="label">在线员工</div>
+          </div>
+          <div class="stat-card">
+            <div class="value">156</div>
+            <div class="label">本月核销</div>
+          </div>
+        </div>
+
+        <!-- Add Staff Button -->
+        <div class="add-staff-btn">
+          <span>➕</span>
+          添加新员工
+        </div>
+
+        <!-- Staff List -->
+        <div class="staff-section">
+          <div class="section-header">
+            <h3 class="section-title">员工列表</h3>
+          </div>
+
+          <div class="staff-list">
+            <!-- Store Manager -->
+            <div class="staff-card">
+              <div class="staff-main">
+                <div class="staff-avatar manager">王</div>
+                <div class="staff-info">
+                  <div class="staff-name">
+                    <h4>王店长</h4>
+                    <span class="role-tag manager">店长</span>
+                  </div>
+                  <p class="staff-phone">139****6666</p>
+                </div>
+                <div class="staff-status online">
+                  <span class="status-dot online"></span>
+                  在线
+                </div>
+              </div>
+              <div class="staff-stats">
+                <div class="staff-stat">
+                  <div class="value">68</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">156</div>
+                  <div class="label">服务客户</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">4.9</div>
+                  <div class="label">服务评分</div>
+                </div>
+              </div>
+              <div class="staff-actions">
+                <div class="staff-action">
+                  <span>📊</span>
+                  业绩
+                </div>
+                <div class="staff-action">
+                  <span>⚙️</span>
+                  权限
+                </div>
+                <div class="staff-action">
+                  <span>✏️</span>
+                  编辑
+                </div>
+              </div>
+            </div>
+
+            <!-- Staff Member 1 -->
+            <div class="staff-card">
+              <div class="staff-main">
+                <div class="staff-avatar">李</div>
+                <div class="staff-info">
+                  <div class="staff-name">
+                    <h4>李师傅</h4>
+                    <span class="role-tag staff">员工</span>
+                  </div>
+                  <p class="staff-phone">138****8888</p>
+                </div>
+                <div class="staff-status online">
+                  <span class="status-dot online"></span>
+                  在线
+                </div>
+              </div>
+              <div class="staff-stats">
+                <div class="staff-stat">
+                  <div class="value">52</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">98</div>
+                  <div class="label">服务客户</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">4.8</div>
+                  <div class="label">服务评分</div>
+                </div>
+              </div>
+              <div class="staff-actions">
+                <div class="staff-action">
+                  <span>📊</span>
+                  业绩
+                </div>
+                <div class="staff-action">
+                  <span>⚙️</span>
+                  权限
+                </div>
+                <div class="staff-action">
+                  <span>✏️</span>
+                  编辑
+                </div>
+              </div>
+            </div>
+
+            <!-- Staff Member 2 -->
+            <div class="staff-card">
+              <div class="staff-main">
+                <div class="staff-avatar">张</div>
+                <div class="staff-info">
+                  <div class="staff-name">
+                    <h4>张技师</h4>
+                    <span class="role-tag staff">员工</span>
+                  </div>
+                  <p class="staff-phone">137****5555</p>
+                </div>
+                <div class="staff-status online">
+                  <span class="status-dot online"></span>
+                  在线
+                </div>
+              </div>
+              <div class="staff-stats">
+                <div class="staff-stat">
+                  <div class="value">36</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">72</div>
+                  <div class="label">服务客户</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">4.7</div>
+                  <div class="label">服务评分</div>
+                </div>
+              </div>
+              <div class="staff-actions">
+                <div class="staff-action">
+                  <span>📊</span>
+                  业绩
+                </div>
+                <div class="staff-action">
+                  <span>⚙️</span>
+                  权限
+                </div>
+                <div class="staff-action">
+                  <span>✏️</span>
+                  编辑
+                </div>
+              </div>
+            </div>
+
+            <!-- Staff Member 3 - Offline -->
+            <div class="staff-card">
+              <div class="staff-main">
+                <div class="staff-avatar">赵</div>
+                <div class="staff-info">
+                  <div class="staff-name">
+                    <h4>赵师傅</h4>
+                    <span class="role-tag staff">员工</span>
+                  </div>
+                  <p class="staff-phone">136****4444</p>
+                </div>
+                <div class="staff-status offline">
+                  <span class="status-dot offline"></span>
+                  离线
+                </div>
+              </div>
+              <div class="staff-stats">
+                <div class="staff-stat">
+                  <div class="value">0</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">45</div>
+                  <div class="label">服务客户</div>
+                </div>
+                <div class="staff-stat">
+                  <div class="value">4.6</div>
+                  <div class="label">服务评分</div>
+                </div>
+              </div>
+              <div class="staff-actions">
+                <div class="staff-action">
+                  <span>📊</span>
+                  业绩
+                </div>
+                <div class="staff-action">
+                  <span>⚙️</span>
+                  权限
+                </div>
+                <div class="staff-action">
+                  <span>✏️</span>
+                  编辑
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invite Section -->
+        <div class="invite-section">
+          <div class="invite-header">
+            <div class="invite-icon">🔗</div>
+            <div class="invite-text">
+              <h4>邀请员工加入</h4>
+              <p>生成邀请链接，快速添加团队成员</p>
+            </div>
+          </div>
+          <div class="invite-btn">
+            <span>📲</span>
+            生成邀请链接
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

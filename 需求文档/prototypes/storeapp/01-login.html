@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 登录</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .login-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background - 简化版 */
+    .bg-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, #e8e8ed 100%);
+    }
+
+    .bg-pattern {
+      display: none;
+    }
+
+    /* Content */
+    .login-content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 24px 40px;
+    }
+
+    /* Logo Section */
+    .logo-section {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: slideDown 0.6s ease forwards;
+    }
+
+    .logo {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 20px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .brand-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Login Form */
+    .login-form {
+      flex: 1;
+      animation: slideUp 0.6s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .form-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .input-wrapper {
+      margin-bottom: 16px;
+    }
+
+    .input-wrapper label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px 15px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: var(--transition-fast);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .input-with-btn {
+      display: flex;
+      gap: 12px;
+    }
+
+    .input-with-btn .input-field {
+      flex: 1;
+    }
+
+    .code-btn {
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-md);
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .code-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    .code-btn:disabled {
+      color: var(--text-tertiary);
+      cursor: not-allowed;
+    }
+
+    /* Login Type Toggle */
+    .login-type-toggle {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .type-option {
+      font-size: 15px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding-bottom: 8px;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition-fast);
+    }
+
+    .type-option.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Remember & Forgot */
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0 32px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-input);
+      border-radius: 4px;
+      transition: var(--transition-fast);
+    }
+
+    .checkbox.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .forgot-link {
+      font-size: 14px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 500;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-light);
+    }
+
+    /* Register Link */
+    .register-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .register-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* Footer */
+    .login-footer {
+      text-align: center;
+      padding-top: 32px;
+      animation: fadeIn 0.6s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .footer-text a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="login-screen">
+        <!-- Background -->
+        <div class="bg-gradient"></div>
+        <div class="bg-pattern"></div>
+
+        <div class="login-content">
+          <!-- Status Bar -->
+          <div class="status-bar" style="position: absolute; top: 0; left: 0; right: 0;">
+            <span class="time">9:41</span>
+            <div class="icons">
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+                <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+                <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+                <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+              </svg>
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+                <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+                <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+                <circle cx="8" cy="10" r="2"/>
+              </svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+                <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+                <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+                <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Logo Section -->
+          <div class="logo-section">
+            <div class="logo">
+              <span class="logo-text">F</span>
+            </div>
+            <h1 class="brand-name">Fuint 门店助手</h1>
+            <p class="brand-subtitle">高效管理 · 智能营销</p>
+          </div>
+
+          <!-- Login Form -->
+          <div class="login-form">
+            <h2 class="form-title">欢迎登录</h2>
+
+            <!-- Login Type Toggle -->
+            <div class="login-type-toggle">
+              <span class="type-option active" onclick="switchType(this, 'password')">账号密码</span>
+              <span class="type-option" onclick="switchType(this, 'code')">验证码登录</span>
+            </div>
+
+            <!-- Password Login -->
+            <div id="passwordForm">
+              <div class="input-wrapper">
+                <label>手机号/账号</label>
+                <input type="text" class="input-field" placeholder="请输入手机号或账号">
+              </div>
+              <div class="input-wrapper">
+                <label>密码</label>
+                <input type="password" class="input-field" placeholder="请输入密码">
+              </div>
+            </div>
+
+            <!-- Code Login (hidden by default) -->
+            <div id="codeForm" style="display: none;">
+              <div class="input-wrapper">
+                <label>手机号</label>
+                <input type="tel" class="input-field" placeholder="请输入手机号">
+              </div>
+              <div class="input-wrapper">
+                <label>验证码</label>
+                <div class="input-with-btn">
+                  <input type="text" class="input-field" placeholder="请输入验证码">
+                  <button class="code-btn" id="sendCodeBtn" onclick="sendCode()">获取验证码</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Options -->
+            <div class="form-options">
+              <label class="remember-me" onclick="toggleCheckbox()">
+                <div class="checkbox" id="rememberCheckbox"></div>
+                <span>记住登录</span>
+              </label>
+              <span class="forgot-link">忘记密码？</span>
+            </div>
+
+            <!-- Submit -->
+            <button class="submit-btn">登 录</button>
+
+            <!-- Register -->
+            <p class="register-link">
+              还没有账号？<a href="02-register.html">立即注册</a>
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div class="login-footer">
+            <p class="footer-text">
+              登录即表示同意 <a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchType(el, type) {
+      document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('active'));
+      el.classList.add('active');
+
+      if (type === 'password') {
+        document.getElementById('passwordForm').style.display = 'block';
+        document.getElementById('codeForm').style.display = 'none';
+      } else {
+        document.getElementById('passwordForm').style.display = 'none';
+        document.getElementById('codeForm').style.display = 'block';
+      }
+    }
+
+    function toggleCheckbox() {
+      document.getElementById('rememberCheckbox').classList.toggle('checked');
+    }
+
+    let countdown = 0;
+    function sendCode() {
+      if (countdown > 0) return;
+      countdown = 60;
+      const btn = document.getElementById('sendCodeBtn');
+      btn.disabled = true;
+
+      const timer = setInterval(() => {
+        countdown--;
+        btn.textContent = countdown + 's';
+        if (countdown <= 0) {
+          clearInterval(timer);
+          btn.textContent = '获取验证码';
+          btn.disabled = false;
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

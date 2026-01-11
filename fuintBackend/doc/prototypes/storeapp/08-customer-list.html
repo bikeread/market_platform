@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 客户列表</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .customer-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Search Bar */
+    .search-section {
+      padding: 0 16px 16px;
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+    }
+
+    .search-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 15px;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .search-bar input:focus {
+      outline: none;
+    }
+
+    /* Filter Tags */
+    .filter-tags {
+      display: flex;
+      gap: 8px;
+      padding: 0 16px 16px;
+      overflow-x: auto;
+      animation: fadeIn 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .filter-tags::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-tag {
+      padding: 8px 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .filter-tag.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      padding: 0 16px 16px;
+      gap: 12px;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .stat-mini {
+      flex: 1;
+      padding: 14px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      text-align: center;
+      border: 1px solid var(--glass-border);
+    }
+
+    .stat-mini .value {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-mini .label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Customer List */
+    .customer-list {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .customer-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      animation: slideUp 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    .customer-card:nth-child(1) { animation-delay: 0.2s; }
+    .customer-card:nth-child(2) { animation-delay: 0.25s; }
+    .customer-card:nth-child(3) { animation-delay: 0.3s; }
+    .customer-card:nth-child(4) { animation-delay: 0.35s; }
+    .customer-card:nth-child(5) { animation-delay: 0.4s; }
+
+    .customer-card:hover {
+      border-color: var(--primary);
+    }
+
+    .customer-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .customer-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .customer-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .customer-name h4 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .level-badge {
+      padding: 2px 8px;
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1));
+      border: 1px solid var(--accent-gold);
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      color: var(--accent-gold);
+    }
+
+    .customer-phone {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .customer-stats {
+      display: flex;
+      gap: 16px;
+    }
+
+    .customer-stat {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .customer-stat span {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .customer-arrow {
+      color: var(--text-tertiary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      color: var(--text-tertiary);
+    }
+
+    /* Bottom Tab Bar */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 375px;
+      height: 83px;
+      padding: 8px 24px 28px;
+      background: rgba(13, 13, 15, 0.95);
+      backdrop-filter: var(--glass-blur);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .tab-item .icon {
+      font-size: 22px;
+      opacity: 0.5;
+    }
+
+    .tab-item.active .icon {
+      opacity: 1;
+    }
+
+    .tab-item .label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    .tab-item.active .label {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="customer-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">客户管理</span>
+          <div class="action">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M3 12h18M3 18h18"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-section">
+          <div class="search-bar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="搜索客户姓名、手机号">
+          </div>
+        </div>
+
+        <!-- Filter Tags -->
+        <div class="filter-tags">
+          <div class="filter-tag active">全部客户</div>
+          <div class="filter-tag">黄金会员</div>
+          <div class="filter-tag">白银会员</div>
+          <div class="filter-tag">普通会员</div>
+          <div class="filter-tag">最近活跃</div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+          <div class="stat-mini">
+            <div class="value">1,256</div>
+            <div class="label">总客户数</div>
+          </div>
+          <div class="stat-mini">
+            <div class="value">42</div>
+            <div class="label">今日新增</div>
+          </div>
+          <div class="stat-mini">
+            <div class="value">328</div>
+            <div class="label">活跃客户</div>
+          </div>
+        </div>
+
+        <!-- Customer List -->
+        <div class="customer-list">
+          <div class="customer-card">
+            <div class="customer-avatar">张</div>
+            <div class="customer-info">
+              <div class="customer-name">
+                <h4>张先生</h4>
+                <span class="level-badge">黄金会员</span>
+              </div>
+              <p class="customer-phone">138****8888</p>
+              <div class="customer-stats">
+                <span class="customer-stat">积分: <span>2,580</span></span>
+                <span class="customer-stat">核销: <span>5</span>次</span>
+              </div>
+            </div>
+            <svg class="customer-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+
+          <div class="customer-card">
+            <div class="customer-avatar">李</div>
+            <div class="customer-info">
+              <div class="customer-name">
+                <h4>李女士</h4>
+                <span class="level-badge">黄金会员</span>
+              </div>
+              <p class="customer-phone">139****6666</p>
+              <div class="customer-stats">
+                <span class="customer-stat">积分: <span>3,120</span></span>
+                <span class="customer-stat">核销: <span>8</span>次</span>
+              </div>
+            </div>
+            <svg class="customer-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+
+          <div class="customer-card">
+            <div class="customer-avatar">王</div>
+            <div class="customer-info">
+              <div class="customer-name">
+                <h4>王先生</h4>
+                <span class="level-badge" style="background: rgba(192,192,192,0.2); border-color: #C0C0C0; color: #C0C0C0;">白银会员</span>
+              </div>
+              <p class="customer-phone">137****5555</p>
+              <div class="customer-stats">
+                <span class="customer-stat">积分: <span>860</span></span>
+                <span class="customer-stat">核销: <span>2</span>次</span>
+              </div>
+            </div>
+            <svg class="customer-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+
+          <div class="customer-card">
+            <div class="customer-avatar">赵</div>
+            <div class="customer-info">
+              <div class="customer-name">
+                <h4>赵女士</h4>
+                <span class="level-badge" style="background: var(--glass-bg); border-color: var(--glass-border); color: var(--text-secondary);">普通会员</span>
+              </div>
+              <p class="customer-phone">136****4444</p>
+              <div class="customer-stats">
+                <span class="customer-stat">积分: <span>320</span></span>
+                <span class="customer-stat">核销: <span>1</span>次</span>
+              </div>
+            </div>
+            <svg class="customer-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+
+          <div class="customer-card">
+            <div class="customer-avatar">陈</div>
+            <div class="customer-info">
+              <div class="customer-name">
+                <h4>陈先生</h4>
+                <span class="level-badge">黄金会员</span>
+              </div>
+              <p class="customer-phone">135****3333</p>
+              <div class="customer-stats">
+                <span class="customer-stat">积分: <span>4,200</span></span>
+                <span class="customer-stat">核销: <span>12</span>次</span>
+              </div>
+            </div>
+            <svg class="customer-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Bottom Tab Bar -->
+        <div class="tab-bar">
+          <div class="tab-item">
+            <span class="icon">🏠</span>
+            <span class="label">工作台</span>
+          </div>
+          <div class="tab-item">
+            <span class="icon">🎪</span>
+            <span class="label">活动</span>
+          </div>
+          <div class="tab-item active">
+            <span class="icon">👥</span>
+            <span class="label">客户</span>
+          </div>
+          <div class="tab-item">
+            <span class="icon">👤</span>
+            <span class="label">我的</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

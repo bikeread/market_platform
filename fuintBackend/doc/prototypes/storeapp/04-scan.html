@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 扫码核销</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .scan-screen {
+      height: 100%;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Camera View */
+    .camera-view {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+    }
+
+    /* Scan Frame */
+    .scan-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 260px;
+      height: 260px;
+    }
+
+    .scan-corners {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-color: var(--primary);
+      border-style: solid;
+      border-width: 0;
+    }
+
+    .corner.tl {
+      top: 0;
+      left: 0;
+      border-top-width: 4px;
+      border-left-width: 4px;
+      border-top-left-radius: 8px;
+    }
+
+    .corner.tr {
+      top: 0;
+      right: 0;
+      border-top-width: 4px;
+      border-right-width: 4px;
+      border-top-right-radius: 8px;
+    }
+
+    .corner.bl {
+      bottom: 0;
+      left: 0;
+      border-bottom-width: 4px;
+      border-left-width: 4px;
+      border-bottom-left-radius: 8px;
+    }
+
+    .corner.br {
+      bottom: 0;
+      right: 0;
+      border-bottom-width: 4px;
+      border-right-width: 4px;
+      border-bottom-right-radius: 8px;
+    }
+
+    /* Scan Line Animation */
+    .scan-line {
+      position: absolute;
+      top: 20%;
+      left: 10%;
+      right: 10%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      border-radius: 2px;
+      animation: scan 2s ease-in-out infinite;
+      box-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary-glow);
+    }
+
+    @keyframes scan {
+      0% { top: 10%; }
+      50% { top: 85%; }
+      100% { top: 10%; }
+    }
+
+    /* Overlay Mask */
+    .overlay-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .overlay-mask::before,
+    .overlay-mask::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .overlay-mask::before {
+      top: 0;
+      height: calc(50% - 130px);
+    }
+
+    .overlay-mask::after {
+      bottom: 0;
+      height: calc(50% - 130px);
+    }
+
+    .overlay-side {
+      position: absolute;
+      top: calc(50% - 130px);
+      height: 260px;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .overlay-side.left {
+      left: 0;
+      width: calc(50% - 130px);
+    }
+
+    .overlay-side.right {
+      right: 0;
+      width: calc(50% - 130px);
+    }
+
+    /* Header */
+    .scan-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 44px 16px 16px;
+      z-index: 20;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: var(--glass-blur);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .scan-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .placeholder {
+      width: 40px;
+    }
+
+    /* Hint Text */
+    .scan-hint {
+      position: absolute;
+      top: calc(50% + 160px);
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      z-index: 20;
+    }
+
+    /* Bottom Actions */
+    .scan-actions {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      z-index: 20;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .action-btn .icon-circle {
+      width: 56px;
+      height: 56px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: var(--glass-blur);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transition: var(--transition-fast);
+    }
+
+    .action-btn:hover .icon-circle {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .action-btn .label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Manual Input Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: flex-end;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      width: 100%;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 24px;
+      transform: translateY(100%);
+      transition: var(--transition-normal);
+    }
+
+    .modal-overlay.show .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      background: var(--glass-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .input-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .input-wrapper label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 18px;
+      font-family: var(--font-display);
+      letter-spacing: 4px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* History Button */
+    .history-btn {
+      position: absolute;
+      top: calc(50% + 210px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="scan-screen">
+        <!-- Camera View -->
+        <div class="camera-view"></div>
+
+        <!-- Overlay Mask -->
+        <div class="overlay-mask">
+          <div class="overlay-side left"></div>
+          <div class="overlay-side right"></div>
+        </div>
+
+        <!-- Scan Frame -->
+        <div class="scan-frame">
+          <div class="scan-corners">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+          </div>
+          <div class="scan-line"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="scan-header">
+          <div class="status-bar" style="padding: 0 0 12px 0;">
+            <span class="time" style="color: white;">9:41</span>
+            <div class="icons">
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+                <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+                <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+                <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+              </svg>
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+                <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+                <circle cx="8" cy="10" r="2"/>
+              </svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+                <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+                <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+              </svg>
+            </div>
+          </div>
+          <div class="header-row">
+            <div class="back-btn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M15 18L9 12L15 6"/>
+              </svg>
+            </div>
+            <span class="scan-title">扫码核销</span>
+            <div class="placeholder"></div>
+          </div>
+        </div>
+
+        <!-- Hint -->
+        <p class="scan-hint">将二维码放入框内，即可自动扫描</p>
+
+        <!-- History Button -->
+        <div class="history-btn">核销记录</div>
+
+        <!-- Bottom Actions -->
+        <div class="scan-actions">
+          <div class="action-btn" onclick="toggleFlash()">
+            <div class="icon-circle">💡</div>
+            <span class="label">闪光灯</span>
+          </div>
+          <div class="action-btn" onclick="showManualInput()">
+            <div class="icon-circle">⌨️</div>
+            <span class="label">手动输入</span>
+          </div>
+          <div class="action-btn">
+            <div class="icon-circle">📷</div>
+            <span class="label">相册</span>
+          </div>
+        </div>
+
+        <!-- Manual Input Modal -->
+        <div class="modal-overlay" id="manualModal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">手动输入核销码</h3>
+              <div class="modal-close" onclick="hideManualInput()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </div>
+            </div>
+            <div class="input-wrapper">
+              <label>核销码</label>
+              <input type="text" class="input-field" placeholder="请输入8位核销码" maxlength="8">
+            </div>
+            <button class="submit-btn">确认核销</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let flashOn = false;
+
+    function toggleFlash() {
+      flashOn = !flashOn;
+      // Visual feedback would be here
+    }
+
+    function showManualInput() {
+      document.getElementById('manualModal').classList.add('show');
+    }
+
+    function hideManualInput() {
+      document.getElementById('manualModal').classList.remove('show');
+    }
+  </script>
+</body>
+</html>

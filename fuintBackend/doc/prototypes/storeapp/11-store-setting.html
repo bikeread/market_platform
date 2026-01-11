@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 门店设置</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .setting-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Store Header Card */
+    .store-header-card {
+      margin: 0 16px 20px;
+      padding: 20px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--glass-border);
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .store-preview {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .store-logo {
+      width: 70px;
+      height: 70px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .edit-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      background: var(--bg-card);
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .store-basic h2 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .store-basic p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-badge.active {
+      background: rgba(48, 209, 88, 0.15);
+      color: var(--accent-green);
+    }
+
+    .status-badge.inactive {
+      background: rgba(99, 99, 102, 0.15);
+      color: var(--text-tertiary);
+    }
+
+    /* Setting Sections */
+    .setting-section {
+      margin-bottom: 20px;
+      padding: 0 16px;
+    }
+
+    .section-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    .setting-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--glass-border);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .setting-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-right: 12px;
+    }
+
+    .setting-icon.blue { background: rgba(10, 132, 255, 0.15); }
+    .setting-icon.green { background: rgba(48, 209, 88, 0.15); }
+    .setting-icon.orange { background: rgba(255, 159, 10, 0.15); }
+    .setting-icon.purple { background: rgba(191, 90, 242, 0.15); }
+    .setting-icon.red { background: rgba(255, 69, 58, 0.15); }
+
+    .setting-content {
+      flex: 1;
+    }
+
+    .setting-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .setting-desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .setting-value {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-right: 8px;
+    }
+
+    .setting-arrow {
+      color: var(--text-tertiary);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      width: 48px;
+      height: 28px;
+      background: var(--glass-border);
+      border-radius: var(--radius-full);
+      position: relative;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .toggle-switch.active {
+      background: var(--accent-green);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      transition: var(--transition-fast);
+    }
+
+    .toggle-switch.active::after {
+      left: 22px;
+    }
+
+    /* Time Display */
+    .time-display {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .time-badge {
+      padding: 4px 10px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-display);
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    /* QR Code Section */
+    .qr-section {
+      margin: 0 16px 20px;
+      padding: 24px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--glass-border);
+      text-align: center;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .qr-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .qr-placeholder {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 16px;
+      background: white;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+    }
+
+    .qr-hint {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 16px;
+    }
+
+    .qr-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .qr-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .qr-btn.secondary {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+    }
+
+    .qr-btn.primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Animations */
+    .setting-section:nth-child(2) { animation: slideUp 0.5s ease 0.05s forwards; opacity: 0; }
+    .setting-section:nth-child(3) { animation: slideUp 0.5s ease 0.1s forwards; opacity: 0; }
+    .setting-section:nth-child(4) { animation: slideUp 0.5s ease 0.15s forwards; opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="setting-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">门店设置</span>
+          <div class="action"></div>
+        </div>
+
+        <!-- Store Header Card -->
+        <div class="store-header-card">
+          <div class="store-preview">
+            <div class="store-logo">
+              🏪
+              <span class="edit-badge">✏️</span>
+            </div>
+            <div class="store-basic">
+              <h2>途虎养车·朝阳店</h2>
+              <p>北京市朝阳区建国路88号</p>
+              <span class="status-badge active">
+                <span style="width:6px;height:6px;background:var(--accent-green);border-radius:50%;"></span>
+                营业中
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Basic Info Section -->
+        <div class="setting-section">
+          <p class="section-label">基本信息</p>
+          <div class="setting-card">
+            <div class="setting-item">
+              <div class="setting-icon blue">🏷️</div>
+              <div class="setting-content">
+                <p class="setting-title">门店名称</p>
+                <p class="setting-desc">修改门店展示名称</p>
+              </div>
+              <span class="setting-value">途虎养车·朝阳店</span>
+              <svg class="setting-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+            <div class="setting-item">
+              <div class="setting-icon green">📍</div>
+              <div class="setting-content">
+                <p class="setting-title">门店地址</p>
+                <p class="setting-desc">修改门店详细地址</p>
+              </div>
+              <svg class="setting-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+            <div class="setting-item">
+              <div class="setting-icon orange">📞</div>
+              <div class="setting-content">
+                <p class="setting-title">联系电话</p>
+                <p class="setting-desc">客户来电联系号码</p>
+              </div>
+              <span class="setting-value">400-888-8888</span>
+              <svg class="setting-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Business Hours Section -->
+        <div class="setting-section">
+          <p class="section-label">营业设置</p>
+          <div class="setting-card">
+            <div class="setting-item">
+              <div class="setting-icon purple">🕐</div>
+              <div class="setting-content">
+                <p class="setting-title">营业时间</p>
+                <p class="setting-desc">设置每日营业时段</p>
+              </div>
+              <div class="time-display">
+                <span class="time-badge">08:00</span>
+                <span style="color:var(--text-tertiary);">-</span>
+                <span class="time-badge">21:00</span>
+              </div>
+              <svg class="setting-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:8px;">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+            <div class="setting-item">
+              <div class="setting-icon green">✅</div>
+              <div class="setting-content">
+                <p class="setting-title">营业状态</p>
+                <p class="setting-desc">控制门店是否对外展示</p>
+              </div>
+              <div class="toggle-switch active"></div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-icon blue">📅</div>
+              <div class="setting-content">
+                <p class="setting-title">休息日设置</p>
+                <p class="setting-desc">设置固定休息日</p>
+              </div>
+              <span class="setting-value">无</span>
+              <svg class="setting-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Settings -->
+        <div class="setting-section">
+          <p class="section-label">服务设置</p>
+          <div class="setting-card">
+            <div class="setting-item">
+              <div class="setting-icon blue">🔔</div>
+              <div class="setting-content">
+                <p class="setting-title">核销提醒</p>
+                <p class="setting-desc">新核销任务消息通知</p>
+              </div>
+              <div class="toggle-switch active"></div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-icon orange">🖨️</div>
+              <div class="setting-content">
+                <p class="setting-title">小票打印机</p>
+                <p class="setting-desc">配置门店打印设备</p>
+              </div>
+              <span class="setting-value">已连接</span>
+              <svg class="setting-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+            <div class="setting-item">
+              <div class="setting-icon purple">💬</div>
+              <div class="setting-content">
+                <p class="setting-title">企微活码</p>
+                <p class="setting-desc">配置员工企业微信</p>
+              </div>
+              <span class="setting-value">已绑定 3 人</span>
+              <svg class="setting-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="qr-section">
+          <h3 class="qr-title">门店推广码</h3>
+          <div class="qr-placeholder">📱</div>
+          <p class="qr-hint">客户扫码即可查看门店详情并参与活动</p>
+          <div class="qr-actions">
+            <div class="qr-btn secondary">下载图片</div>
+            <div class="qr-btn primary">分享链接</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle switch interaction
+    document.querySelectorAll('.toggle-switch').forEach(toggle => {
+      toggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 活动审核</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .desktop-frame {
+      display: flex;
+    }
+
+    /* Stats Overview */
+    .audit-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+      animation: none;
+    }
+
+    .audit-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .audit-stat .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .audit-stat .icon.orange { background: rgba(255, 159, 10, 0.15); }
+    .audit-stat .icon.green { background: rgba(48, 209, 88, 0.15); }
+    .audit-stat .icon.red { background: rgba(255, 69, 58, 0.15); }
+    .audit-stat .icon.blue { background: var(--primary-light); }
+
+    .audit-stat .value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .audit-stat .label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* Activity Cards */
+    .audit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: none;
+      opacity: 1;
+    }
+
+    .audit-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition-fast);
+    }
+
+    .audit-card:hover {
+      border-color: var(--border-light);
+    }
+
+    .audit-main {
+      display: flex;
+      padding: 24px;
+      gap: 24px;
+    }
+
+    .audit-banner {
+      width: 200px;
+      height: 120px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      flex-shrink: 0;
+    }
+
+    .audit-banner.checkin { background: linear-gradient(135deg, #30D158, #28A745); }
+    .audit-banner.lottery { background: linear-gradient(135deg, #FFD60A, #D4A600); }
+    .audit-banner.invite { background: linear-gradient(135deg, #BF5AF2, #8E44AD); }
+
+    .audit-content {
+      flex: 1;
+    }
+
+    .audit-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .audit-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .audit-type {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .audit-status {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .audit-status.pending {
+      background: rgba(255, 159, 10, 0.15);
+      color: var(--accent-orange);
+    }
+
+    .audit-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .audit-meta {
+      display: flex;
+      gap: 24px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* Audit Actions */
+    .audit-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--bg-tertiary);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .applicant-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .applicant-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: white;
+    }
+
+    .applicant-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .applicant-store {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .action-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .detail-section {
+      margin-bottom: 24px;
+    }
+
+    .detail-section h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .detail-item {
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+    }
+
+    .detail-item .label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .detail-item .value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .reward-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reward-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+    }
+
+    .reward-item .condition {
+      font-size: 13px;
+    }
+
+    .reward-item .prize {
+      font-size: 13px;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .audit-reason {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      resize: none;
+    }
+
+    .audit-reason:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-frame">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🚗</div>
+          <div class="logo-text">
+            Fuint
+            <span>管理后台</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">概览</div>
+          <div class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">数据看板</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">商户管理</div>
+          <div class="nav-item">
+            <span class="icon">🏢</span>
+            <span class="label">商家列表</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🏪</span>
+            <span class="label">门店管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">审核中心</div>
+          <div class="nav-item active">
+            <span class="icon">📋</span>
+            <span class="label">活动审核</span>
+            <span class="badge">5</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎁</span>
+            <span class="label">奖品审核</span>
+            <span class="badge">3</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">活动配置</div>
+          <div class="nav-item">
+            <span class="icon">📅</span>
+            <span class="label">签到设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎰</span>
+            <span class="label">抽奖设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">👥</span>
+            <span class="label">裂变设置</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">系统设置</div>
+          <div class="nav-item">
+            <span class="icon">⭐</span>
+            <span class="label">会员等级</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">💎</span>
+            <span class="label">积分规则</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">⚙️</span>
+            <span class="label">系统设置</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">管</div>
+          <div class="user-info">
+            <div class="user-name">管理员</div>
+            <div class="user-role">超级管理员</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title">活动审核</h1>
+          <div class="breadcrumb">
+            <a href="#">首页</a>
+            <span>/</span>
+            <span>审核中心</span>
+            <span>/</span>
+            <span>活动审核</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="搜索活动名称...">
+          </div>
+          <div class="header-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span class="dot"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Audit Stats -->
+        <div class="audit-stats">
+          <div class="audit-stat">
+            <div class="icon orange">⏳</div>
+            <div>
+              <div class="value">5</div>
+              <div class="label">待审核</div>
+            </div>
+          </div>
+          <div class="audit-stat">
+            <div class="icon green">✅</div>
+            <div>
+              <div class="value">128</div>
+              <div class="label">已通过</div>
+            </div>
+          </div>
+          <div class="audit-stat">
+            <div class="icon red">❌</div>
+            <div>
+              <div class="value">12</div>
+              <div class="label">已驳回</div>
+            </div>
+          </div>
+          <div class="audit-stat">
+            <div class="icon blue">📊</div>
+            <div>
+              <div class="value">145</div>
+              <div class="label">总申请</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit List -->
+        <div class="audit-list">
+          <!-- Audit Item 1 -->
+          <div class="audit-card">
+            <div class="audit-main">
+              <div class="audit-banner checkin">📅</div>
+              <div class="audit-content">
+                <div class="audit-header">
+                  <div>
+                    <h3 class="audit-title">春节签到送好礼</h3>
+                    <span class="audit-type">签到活动</span>
+                  </div>
+                  <span class="audit-status pending">待审核</span>
+                </div>
+                <p class="audit-desc">春节期间每日签到送积分，连续签到7天额外奖励精美礼品，活动期间累计签到还可获得抽奖机会</p>
+                <div class="audit-meta">
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    2025-01-20 至 2025-02-15
+                  </div>
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    申请于 2025-01-05 14:32
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="audit-actions">
+              <div class="applicant-info">
+                <div class="applicant-avatar">途</div>
+                <div>
+                  <div class="applicant-name">途虎养车·朝阳店</div>
+                  <div class="applicant-store">途虎养车集团</div>
+                </div>
+              </div>
+              <div class="action-group">
+                <button class="btn btn-secondary btn-sm">查看详情</button>
+                <button class="btn btn-danger btn-sm">驳回</button>
+                <button class="btn btn-success btn-sm">通过</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Item 2 -->
+          <div class="audit-card">
+            <div class="audit-main">
+              <div class="audit-banner lottery">🎰</div>
+              <div class="audit-content">
+                <div class="audit-header">
+                  <div>
+                    <h3 class="audit-title">新年幸运大转盘</h3>
+                    <span class="audit-type">抽奖活动</span>
+                  </div>
+                  <span class="audit-status pending">待审核</span>
+                </div>
+                <p class="audit-desc">新年期间参与抽奖赢取丰厚奖品，包含保养券、精洗服务、车载香薰等多重好礼</p>
+                <div class="audit-meta">
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    2025-01-15 至 2025-02-28
+                  </div>
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    申请于 2025-01-04 16:15
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="audit-actions">
+              <div class="applicant-info">
+                <div class="applicant-avatar" style="background:linear-gradient(135deg,#30D158,#28A745);">驰</div>
+                <div>
+                  <div class="applicant-name">驰加汽车·浦东店</div>
+                  <div class="applicant-store">驰加汽车服务</div>
+                </div>
+              </div>
+              <div class="action-group">
+                <button class="btn btn-secondary btn-sm">查看详情</button>
+                <button class="btn btn-danger btn-sm">驳回</button>
+                <button class="btn btn-success btn-sm">通过</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Item 3 -->
+          <div class="audit-card">
+            <div class="audit-main">
+              <div class="audit-banner invite">👥</div>
+              <div class="audit-content">
+                <div class="audit-header">
+                  <div>
+                    <h3 class="audit-title">邀请好友双倍奖励</h3>
+                    <span class="audit-type">裂变活动</span>
+                  </div>
+                  <span class="audit-status pending">待审核</span>
+                </div>
+                <p class="audit-desc">邀请好友注册成为会员，邀请人和被邀请人均可获得积分奖励，邀请越多奖励越丰厚</p>
+                <div class="audit-meta">
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    2025-01-10 至 2025-03-31
+                  </div>
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    申请于 2025-01-03 10:28
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="audit-actions">
+              <div class="applicant-info">
+                <div class="applicant-avatar" style="background:linear-gradient(135deg,#BF5AF2,#8E44AD);">天</div>
+                <div>
+                  <div class="applicant-name">天猫养车·天河店</div>
+                  <div class="applicant-store">天猫养车</div>
+                </div>
+              </div>
+              <div class="action-group">
+                <button class="btn btn-secondary btn-sm">查看详情</button>
+                <button class="btn btn-danger btn-sm">驳回</button>
+                <button class="btn btn-success btn-sm">通过</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Item 4 -->
+          <div class="audit-card">
+            <div class="audit-main">
+              <div class="audit-banner checkin">📅</div>
+              <div class="audit-content">
+                <div class="audit-header">
+                  <div>
+                    <h3 class="audit-title">2月签到积分翻倍</h3>
+                    <span class="audit-type">签到活动</span>
+                  </div>
+                  <span class="audit-status pending">待审核</span>
+                </div>
+                <p class="audit-desc">2月份签到积分翻倍，每日签到可获得双倍积分，助力会员快速提升等级</p>
+                <div class="audit-meta">
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    2025-02-01 至 2025-02-28
+                  </div>
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    申请于 2025-01-06 09:15
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="audit-actions">
+              <div class="applicant-info">
+                <div class="applicant-avatar">途</div>
+                <div>
+                  <div class="applicant-name">途虎养车·南山店</div>
+                  <div class="applicant-store">途虎养车集团</div>
+                </div>
+              </div>
+              <div class="action-group">
+                <button class="btn btn-secondary btn-sm">查看详情</button>
+                <button class="btn btn-danger btn-sm">驳回</button>
+                <button class="btn btn-success btn-sm">通过</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Item 5 -->
+          <div class="audit-card">
+            <div class="audit-main">
+              <div class="audit-banner lottery">🎰</div>
+              <div class="audit-content">
+                <div class="audit-header">
+                  <div>
+                    <h3 class="audit-title">情人节抽奖活动</h3>
+                    <span class="audit-type">抽奖活动</span>
+                  </div>
+                  <span class="audit-status pending">待审核</span>
+                </div>
+                <p class="audit-desc">情人节限定抽奖活动，奖品包含情侣洗车套餐、车内香薰礼盒等浪漫好礼</p>
+                <div class="audit-meta">
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    2025-02-10 至 2025-02-16
+                  </div>
+                  <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    申请于 2025-01-06 11:42
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="audit-actions">
+              <div class="applicant-info">
+                <div class="applicant-avatar" style="background:linear-gradient(135deg,#FF9F0A,#D4840A);">京</div>
+                <div>
+                  <div class="applicant-name">京车会·西城店</div>
+                  <div class="applicant-store">京东京车会</div>
+                </div>
+              </div>
+              <div class="action-group">
+                <button class="btn btn-secondary btn-sm">查看详情</button>
+                <button class="btn btn-danger btn-sm">驳回</button>
+                <button class="btn btn-success btn-sm">通过</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 门店管理</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .desktop-frame {
+      display: flex;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      animation: none;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .filter-dropdown {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    /* Store Cards Grid */
+    .store-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      animation: none;
+      opacity: 1;
+    }
+
+    .store-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition-fast);
+    }
+
+    .store-card:hover {
+      border-color: var(--border-light);
+      transform: translateY(-2px);
+    }
+
+    .store-banner {
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .store-banner.green { background: linear-gradient(135deg, #30D158, #28A745); }
+    .store-banner.orange { background: linear-gradient(135deg, #FF9F0A, #D4840A); }
+    .store-banner.purple { background: linear-gradient(135deg, #BF5AF2, #8E44AD); }
+
+    .store-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+    }
+
+    .store-banner .icon {
+      font-size: 48px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .store-status {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .store-status.open {
+      background: rgba(48, 209, 88, 0.9);
+      color: white;
+    }
+
+    .store-status.closed {
+      background: rgba(99, 99, 102, 0.9);
+      color: white;
+    }
+
+    .store-status.pending {
+      background: rgba(255, 159, 10, 0.9);
+      color: white;
+    }
+
+    .store-body {
+      padding: 20px;
+    }
+
+    .store-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .store-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .store-merchant {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .store-menu {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass-bg);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .store-menu:hover {
+      background: var(--bg-hover);
+    }
+
+    .store-address {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .store-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 16px 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+
+    .store-stat {
+      text-align: center;
+    }
+
+    .store-stat .value {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .store-stat .label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .store-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .store-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .store-btn.secondary {
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .store-btn.secondary:hover {
+      background: var(--bg-hover);
+    }
+
+    .store-btn.primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .store-btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-frame">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🚗</div>
+          <div class="logo-text">
+            Fuint
+            <span>管理后台</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">概览</div>
+          <div class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">数据看板</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">商户管理</div>
+          <div class="nav-item">
+            <span class="icon">🏢</span>
+            <span class="label">商家列表</span>
+          </div>
+          <div class="nav-item active">
+            <span class="icon">🏪</span>
+            <span class="label">门店管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">审核中心</div>
+          <div class="nav-item">
+            <span class="icon">📋</span>
+            <span class="label">活动审核</span>
+            <span class="badge">5</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎁</span>
+            <span class="label">奖品审核</span>
+            <span class="badge">3</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">活动配置</div>
+          <div class="nav-item">
+            <span class="icon">📅</span>
+            <span class="label">签到设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎰</span>
+            <span class="label">抽奖设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">👥</span>
+            <span class="label">裂变设置</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">系统设置</div>
+          <div class="nav-item">
+            <span class="icon">⭐</span>
+            <span class="label">会员等级</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">💎</span>
+            <span class="label">积分规则</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">⚙️</span>
+            <span class="label">系统设置</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">管</div>
+          <div class="user-info">
+            <div class="user-name">管理员</div>
+            <div class="user-role">超级管理员</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title">门店管理</h1>
+          <div class="breadcrumb">
+            <a href="#">首页</a>
+            <span>/</span>
+            <span>商户管理</span>
+            <span>/</span>
+            <span>门店管理</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="搜索门店名称、地址...">
+          </div>
+          <div class="header-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span class="dot"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="filter-tabs">
+              <div class="filter-tab active">全部门店</div>
+              <div class="filter-tab">营业中</div>
+              <div class="filter-tab">待审核</div>
+              <div class="filter-tab">已关闭</div>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <div class="filter-dropdown">
+              <span>所属商家</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </div>
+            <div class="filter-dropdown">
+              <span>所在城市</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </div>
+            <button class="btn btn-secondary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              导出数据
+            </button>
+          </div>
+        </div>
+
+        <!-- Store Grid -->
+        <div class="store-grid">
+          <!-- Store 1 -->
+          <div class="store-card">
+            <div class="store-banner">
+              <span class="store-status open">营业中</span>
+              <span class="icon">🏪</span>
+            </div>
+            <div class="store-body">
+              <div class="store-header">
+                <div>
+                  <h3 class="store-name">途虎养车·朝阳店</h3>
+                  <p class="store-merchant">途虎养车集团</p>
+                </div>
+                <div class="store-menu">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="store-address">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                北京市朝阳区建国路88号SOHO现代城A座
+              </div>
+              <div class="store-stats">
+                <div class="store-stat">
+                  <div class="value">3,256</div>
+                  <div class="label">会员数</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">156</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">4.9</div>
+                  <div class="label">评分</div>
+                </div>
+              </div>
+              <div class="store-actions">
+                <button class="store-btn secondary">查看详情</button>
+                <button class="store-btn primary">数据统计</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store 2 -->
+          <div class="store-card">
+            <div class="store-banner green">
+              <span class="store-status open">营业中</span>
+              <span class="icon">🏪</span>
+            </div>
+            <div class="store-body">
+              <div class="store-header">
+                <div>
+                  <h3 class="store-name">途虎养车·浦东店</h3>
+                  <p class="store-merchant">途虎养车集团</p>
+                </div>
+                <div class="store-menu">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="store-address">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                上海市浦东新区陆家嘴环路1000号
+              </div>
+              <div class="store-stats">
+                <div class="store-stat">
+                  <div class="value">2,890</div>
+                  <div class="label">会员数</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">128</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">4.8</div>
+                  <div class="label">评分</div>
+                </div>
+              </div>
+              <div class="store-actions">
+                <button class="store-btn secondary">查看详情</button>
+                <button class="store-btn primary">数据统计</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store 3 -->
+          <div class="store-card">
+            <div class="store-banner orange">
+              <span class="store-status pending">待审核</span>
+              <span class="icon">🏪</span>
+            </div>
+            <div class="store-body">
+              <div class="store-header">
+                <div>
+                  <h3 class="store-name">驰加汽车·海淀店</h3>
+                  <p class="store-merchant">驰加汽车服务</p>
+                </div>
+                <div class="store-menu">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="store-address">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                北京市海淀区中关村大街1号
+              </div>
+              <div class="store-stats">
+                <div class="store-stat">
+                  <div class="value">-</div>
+                  <div class="label">会员数</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">-</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">-</div>
+                  <div class="label">评分</div>
+                </div>
+              </div>
+              <div class="store-actions">
+                <button class="store-btn secondary">查看资料</button>
+                <button class="store-btn primary" style="background:var(--accent-orange);">审核</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store 4 -->
+          <div class="store-card">
+            <div class="store-banner purple">
+              <span class="store-status open">营业中</span>
+              <span class="icon">🏪</span>
+            </div>
+            <div class="store-body">
+              <div class="store-header">
+                <div>
+                  <h3 class="store-name">天猫养车·天河店</h3>
+                  <p class="store-merchant">天猫养车</p>
+                </div>
+                <div class="store-menu">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="store-address">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                广州市天河区天河路385号太古汇
+              </div>
+              <div class="store-stats">
+                <div class="store-stat">
+                  <div class="value">1,856</div>
+                  <div class="label">会员数</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">98</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">4.7</div>
+                  <div class="label">评分</div>
+                </div>
+              </div>
+              <div class="store-actions">
+                <button class="store-btn secondary">查看详情</button>
+                <button class="store-btn primary">数据统计</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store 5 -->
+          <div class="store-card">
+            <div class="store-banner">
+              <span class="store-status open">营业中</span>
+              <span class="icon">🏪</span>
+            </div>
+            <div class="store-body">
+              <div class="store-header">
+                <div>
+                  <h3 class="store-name">途虎养车·南山店</h3>
+                  <p class="store-merchant">途虎养车集团</p>
+                </div>
+                <div class="store-menu">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="store-address">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                深圳市南山区科技园南区
+              </div>
+              <div class="store-stats">
+                <div class="store-stat">
+                  <div class="value">2,120</div>
+                  <div class="label">会员数</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">112</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">4.8</div>
+                  <div class="label">评分</div>
+                </div>
+              </div>
+              <div class="store-actions">
+                <button class="store-btn secondary">查看详情</button>
+                <button class="store-btn primary">数据统计</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store 6 -->
+          <div class="store-card">
+            <div class="store-banner green">
+              <span class="store-status closed">已关闭</span>
+              <span class="icon">🏪</span>
+            </div>
+            <div class="store-body">
+              <div class="store-header">
+                <div>
+                  <h3 class="store-name">京车会·西城店</h3>
+                  <p class="store-merchant">京东京车会</p>
+                </div>
+                <div class="store-menu">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="store-address">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                北京市西城区西单北大街120号
+              </div>
+              <div class="store-stats">
+                <div class="store-stat">
+                  <div class="value">856</div>
+                  <div class="label">会员数</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">0</div>
+                  <div class="label">本月核销</div>
+                </div>
+                <div class="store-stat">
+                  <div class="value">4.2</div>
+                  <div class="label">评分</div>
+                </div>
+              </div>
+              <div class="store-actions">
+                <button class="store-btn secondary">查看详情</button>
+                <button class="store-btn primary" style="background:var(--accent-green);">启用</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrapper">
+          <div class="pagination-info">
+            共 <strong>428</strong> 个门店，显示 1-6
+          </div>
+          <div class="pagination">
+            <button class="page-btn" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">72</button>
+            <button class="page-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

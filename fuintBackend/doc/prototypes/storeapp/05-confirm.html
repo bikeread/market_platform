@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 核销确认</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .confirm-screen {
+      height: 100%;
+      background: var(--bg-primary);
+    }
+
+    .confirm-content {
+      padding: 0 20px 120px;
+    }
+
+    /* Success Icon */
+    .success-section {
+      text-align: center;
+      padding: 40px 0;
+      animation: scaleIn 0.5s ease forwards;
+    }
+
+    .success-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--accent-green), #28A745);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 40px rgba(48, 209, 88, 0.3);
+    }
+
+    .success-icon svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .success-code {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .success-code span {
+      font-family: var(--font-display);
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+
+    /* Prize Info Card */
+    .prize-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--glass-border);
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .prize-image {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    .prize-info h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .prize-source {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .prize-validity {
+      font-size: 13px;
+      color: var(--accent-green);
+    }
+
+    /* Info Rows */
+    .info-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* Customer Card */
+    .customer-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--glass-border);
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .customer-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .customer-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .customer-info h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .customer-info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .customer-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .customer-stat {
+      text-align: center;
+    }
+
+    .customer-stat .value {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .customer-stat .label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 375px;
+      padding: 20px;
+      background: linear-gradient(to top, var(--bg-primary), transparent);
+      display: flex;
+      gap: 12px;
+      z-index: 50;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 18px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      flex: 2;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--accent-green), #28A745);
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(48, 209, 88, 0.3);
+    }
+
+    /* Notice */
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(255, 159, 10, 0.1);
+      border: 1px solid rgba(255, 159, 10, 0.3);
+      border-radius: var(--radius-lg);
+      animation: slideUp 0.5s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .notice-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .notice-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .notice-text strong {
+      color: var(--accent-orange);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="confirm-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">核销确认</span>
+          <div class="action"></div>
+        </div>
+
+        <div class="confirm-content">
+          <!-- Success Section -->
+          <div class="success-section">
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <path d="M20 6L9 17L4 12"/>
+              </svg>
+            </div>
+            <h1 class="success-title">扫码成功</h1>
+            <p class="success-code">核销码: <span>A8B2C4D6</span></p>
+          </div>
+
+          <!-- Prize Card -->
+          <div class="prize-card">
+            <div class="card-header">
+              <div class="prize-image">🎫</div>
+              <div class="prize-info">
+                <h3>500元保养券</h3>
+                <p class="prize-source">来源: 幸运扭蛋活动</p>
+                <p class="prize-validity">有效期至 2025-03-31</p>
+              </div>
+            </div>
+            <div class="info-rows">
+              <div class="info-row">
+                <span class="info-label">奖品类型</span>
+                <span class="info-value">服务券</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">获得时间</span>
+                <span class="info-value">2025-01-02 14:32</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">使用范围</span>
+                <span class="info-value">全部保养服务</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Card -->
+          <div class="customer-card">
+            <div class="customer-header">
+              <div class="customer-avatar">👤</div>
+              <div class="customer-info">
+                <h4>张先生</h4>
+                <p>138****8888 · 黄金会员</p>
+              </div>
+            </div>
+            <div class="customer-stats">
+              <div class="customer-stat">
+                <div class="value">2,580</div>
+                <div class="label">当前积分</div>
+              </div>
+              <div class="customer-stat">
+                <div class="value">12</div>
+                <div class="label">邀请好友</div>
+              </div>
+              <div class="customer-stat">
+                <div class="value">5</div>
+                <div class="label">已核销</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notice -->
+          <div class="notice">
+            <span class="notice-icon">⚠️</span>
+            <p class="notice-text">
+              <strong>核销提醒：</strong>请确认顾客身份信息与奖品内容无误后再进行核销，核销后不可撤销。
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="btn-cancel">取消</button>
+          <button class="btn-confirm">确认核销</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

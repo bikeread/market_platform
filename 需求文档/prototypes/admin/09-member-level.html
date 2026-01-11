@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 会员等级</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .desktop-frame {
+      display: flex;
+    }
+
+    /* Level Cards */
+    .level-grid {
+      display: flex;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+      animation: none;
+    }
+
+    .level-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: var(--transition-fast);
+    }
+
+    .level-card:hover {
+      border-color: var(--border-light);
+      transform: translateY(-4px);
+    }
+
+    .level-header {
+      padding: 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .level-header.normal {
+      background: linear-gradient(135deg, #636366, #48484A);
+    }
+
+    .level-header.silver {
+      background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+    }
+
+    .level-header.gold {
+      background: linear-gradient(135deg, #FFD60A, #D4A600);
+    }
+
+    .level-header.diamond {
+      background: linear-gradient(135deg, #64D2FF, #0A84FF);
+    }
+
+    .level-badge {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .level-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .level-header.silver .level-name,
+    .level-header.gold .level-name {
+      color: #333;
+    }
+
+    .level-condition {
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .level-header.silver .level-condition,
+    .level-header.gold .level-condition {
+      color: rgba(0,0,0,0.6);
+    }
+
+    .level-body {
+      padding: 20px;
+    }
+
+    .level-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .level-stat:last-child {
+      border-bottom: none;
+    }
+
+    .level-stat .label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .level-stat .value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .level-actions {
+      padding: 0 20px 20px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .level-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-align: center;
+    }
+
+    .level-btn.edit {
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .level-btn.edit:hover {
+      background: var(--bg-hover);
+    }
+
+    /* Benefits Table */
+    .benefits-card {
+      animation: none;
+      opacity: 1;
+    }
+
+    .benefits-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .benefits-table th,
+    .benefits-table td {
+      padding: 16px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .benefits-table th {
+      background: var(--bg-tertiary);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .benefits-table th:first-child {
+      text-align: left;
+    }
+
+    .benefits-table td:first-child {
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .benefits-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .check-icon {
+      width: 24px;
+      height: 24px;
+      margin: 0 auto;
+      background: rgba(48, 209, 88, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-green);
+    }
+
+    .cross-icon {
+      width: 24px;
+      height: 24px;
+      margin: 0 auto;
+      background: rgba(255, 69, 58, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-red);
+    }
+
+    .multiplier {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-frame">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🚗</div>
+          <div class="logo-text">
+            Fuint
+            <span>管理后台</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">概览</div>
+          <div class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">数据看板</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">商户管理</div>
+          <div class="nav-item">
+            <span class="icon">🏢</span>
+            <span class="label">商家列表</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🏪</span>
+            <span class="label">门店管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">审核中心</div>
+          <div class="nav-item">
+            <span class="icon">📋</span>
+            <span class="label">活动审核</span>
+            <span class="badge">5</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎁</span>
+            <span class="label">奖品审核</span>
+            <span class="badge">3</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">活动配置</div>
+          <div class="nav-item">
+            <span class="icon">📅</span>
+            <span class="label">签到设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎰</span>
+            <span class="label">抽奖设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">👥</span>
+            <span class="label">裂变设置</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">系统设置</div>
+          <div class="nav-item active">
+            <span class="icon">⭐</span>
+            <span class="label">会员等级</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">💎</span>
+            <span class="label">积分规则</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">⚙️</span>
+            <span class="label">系统设置</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">管</div>
+          <div class="user-info">
+            <div class="user-name">管理员</div>
+            <div class="user-role">超级管理员</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title">会员等级</h1>
+          <div class="breadcrumb">
+            <a href="#">首页</a>
+            <span>/</span>
+            <span>系统设置</span>
+            <span>/</span>
+            <span>会员等级</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            添加等级
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Level Cards -->
+        <div class="level-grid">
+          <!-- Normal -->
+          <div class="level-card">
+            <div class="level-header normal">
+              <div class="level-badge">👤</div>
+              <h3 class="level-name">普通会员</h3>
+              <p class="level-condition">注册即可</p>
+            </div>
+            <div class="level-body">
+              <div class="level-stat">
+                <span class="label">当前人数</span>
+                <span class="value">10,560</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">积分倍率</span>
+                <span class="value">1.0x</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">升级条件</span>
+                <span class="value">-</span>
+              </div>
+            </div>
+            <div class="level-actions">
+              <button class="level-btn edit">编辑</button>
+            </div>
+          </div>
+
+          <!-- Silver -->
+          <div class="level-card">
+            <div class="level-header silver">
+              <div class="level-badge">🥈</div>
+              <h3 class="level-name">白银会员</h3>
+              <p class="level-condition">累计消费 ≥500元</p>
+            </div>
+            <div class="level-body">
+              <div class="level-stat">
+                <span class="label">当前人数</span>
+                <span class="value">5,230</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">积分倍率</span>
+                <span class="value">1.2x</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">升级条件</span>
+                <span class="value">¥500</span>
+              </div>
+            </div>
+            <div class="level-actions">
+              <button class="level-btn edit">编辑</button>
+            </div>
+          </div>
+
+          <!-- Gold -->
+          <div class="level-card">
+            <div class="level-header gold">
+              <div class="level-badge">🥇</div>
+              <h3 class="level-name">黄金会员</h3>
+              <p class="level-condition">累计消费 ≥2000元</p>
+            </div>
+            <div class="level-body">
+              <div class="level-stat">
+                <span class="label">当前人数</span>
+                <span class="value">2,890</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">积分倍率</span>
+                <span class="value">1.5x</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">升级条件</span>
+                <span class="value">¥2000</span>
+              </div>
+            </div>
+            <div class="level-actions">
+              <button class="level-btn edit">编辑</button>
+            </div>
+          </div>
+
+          <!-- Diamond -->
+          <div class="level-card">
+            <div class="level-header diamond">
+              <div class="level-badge">💎</div>
+              <h3 class="level-name">钻石会员</h3>
+              <p class="level-condition">累计消费 ≥5000元</p>
+            </div>
+            <div class="level-body">
+              <div class="level-stat">
+                <span class="label">当前人数</span>
+                <span class="value">856</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">积分倍率</span>
+                <span class="value">2.0x</span>
+              </div>
+              <div class="level-stat">
+                <span class="label">升级条件</span>
+                <span class="value">¥5000</span>
+              </div>
+            </div>
+            <div class="level-actions">
+              <button class="level-btn edit">编辑</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Benefits Table -->
+        <div class="table-card benefits-card">
+          <div class="table-header">
+            <h3 class="table-title">会员权益对比</h3>
+          </div>
+          <table class="benefits-table">
+            <thead>
+              <tr>
+                <th>权益项目</th>
+                <th>普通会员</th>
+                <th>白银会员</th>
+                <th>黄金会员</th>
+                <th>钻石会员</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>积分获取倍率</td>
+                <td><span class="multiplier">1.0x</span></td>
+                <td><span class="multiplier">1.2x</span></td>
+                <td><span class="multiplier">1.5x</span></td>
+                <td><span class="multiplier">2.0x</span></td>
+              </tr>
+              <tr>
+                <td>每日签到积分</td>
+                <td>10</td>
+                <td>12</td>
+                <td>15</td>
+                <td>20</td>
+              </tr>
+              <tr>
+                <td>每日抽奖次数</td>
+                <td>1次</td>
+                <td>2次</td>
+                <td>3次</td>
+                <td>5次</td>
+              </tr>
+              <tr>
+                <td>专属客服</td>
+                <td>
+                  <div class="cross-icon">✕</div>
+                </td>
+                <td>
+                  <div class="cross-icon">✕</div>
+                </td>
+                <td>
+                  <div class="check-icon">✓</div>
+                </td>
+                <td>
+                  <div class="check-icon">✓</div>
+                </td>
+              </tr>
+              <tr>
+                <td>生日礼包</td>
+                <td>
+                  <div class="cross-icon">✕</div>
+                </td>
+                <td>
+                  <div class="check-icon">✓</div>
+                </td>
+                <td>
+                  <div class="check-icon">✓</div>
+                </td>
+                <td>
+                  <div class="check-icon">✓</div>
+                </td>
+              </tr>
+              <tr>
+                <td>免费精洗/月</td>
+                <td>0次</td>
+                <td>0次</td>
+                <td>1次</td>
+                <td>2次</td>
+              </tr>
+              <tr>
+                <td>优先预约</td>
+                <td>
+                  <div class="cross-icon">✕</div>
+                </td>
+                <td>
+                  <div class="cross-icon">✕</div>
+                </td>
+                <td>
+                  <div class="cross-icon">✕</div>
+                </td>
+                <td>
+                  <div class="check-icon">✓</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

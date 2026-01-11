@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 门店详情</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .store-detail-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Hero Image Carousel */
+    .hero-carousel {
+      position: relative;
+      height: 280px;
+      overflow: hidden;
+    }
+
+    .carousel-images {
+      display: flex;
+      height: 100%;
+      transition: transform 0.5s ease;
+    }
+
+    .carousel-image {
+      min-width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .carousel-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, var(--bg-primary));
+    }
+
+    .carousel-placeholder {
+      font-size: 36px;
+      opacity: 0.3;
+    }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transition: var(--transition-fast);
+    }
+
+    .dot.active {
+      width: 24px;
+      border-radius: 4px;
+      background: white;
+    }
+
+    /* Back Button Overlay */
+    .back-overlay {
+      position: absolute;
+      top: 44px;
+      left: 16px;
+      z-index: 20;
+    }
+
+    .back-btn-circle {
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .back-btn-circle:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Store Info Card */
+    .store-info-card {
+      margin: -40px 16px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-light);
+      animation: slideUp 0.5s ease forwards;
+    }
+
+    .store-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .store-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .store-tags {
+      display: flex;
+      gap: 8px;
+    }
+
+    .store-tag {
+      padding: 4px 10px;
+      background: var(--primary-glow);
+      color: var(--primary);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .store-tag.hot {
+      background: rgba(255, 69, 58, 0.2);
+      color: var(--accent-red);
+    }
+
+    .favorite-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .favorite-btn:hover {
+      background: var(--border-light);
+    }
+
+    .favorite-btn.active svg {
+      fill: var(--accent-red);
+      stroke: var(--accent-red);
+    }
+
+    /* Info Rows */
+    .info-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .info-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .info-content {
+      flex: 1;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .info-value a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin: 20px 16px;
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition-normal);
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .action-btn.secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Section Title */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin: 24px 16px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    /* Staff List */
+    .staff-list {
+      display: flex;
+      gap: 16px;
+      padding: 0 16px;
+      overflow-x: auto;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .staff-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .staff-card {
+      min-width: 140px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .staff-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .staff-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .staff-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .staff-role {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 12px;
+    }
+
+    .wechat-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #07C160;
+      color: white;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* Activity List */
+    .activity-list {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: slideUp 0.5s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .activity-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .activity-card:hover {
+      border-color: var(--primary);
+    }
+
+    .activity-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .activity-icon.checkin {
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.2), rgba(48, 209, 88, 0.1));
+    }
+
+    .activity-icon.lottery {
+      background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1));
+    }
+
+    .activity-icon.invite {
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(10, 132, 255, 0.1));
+    }
+
+    .activity-info {
+      flex: 1;
+    }
+
+    .activity-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .activity-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .activity-arrow {
+      color: var(--text-tertiary);
+    }
+
+    /* Status Bar Override */
+    .status-bar-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 44px;
+      padding: 12px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .status-bar-overlay .time {
+      font-weight: 600;
+      font-size: 14px;
+      color: white;
+    }
+
+    .status-bar-overlay .icons {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="store-detail-screen">
+        <!-- Hero Carousel -->
+        <div class="hero-carousel">
+          <!-- Status Bar -->
+          <div class="status-bar-overlay">
+            <span class="time">9:41</span>
+            <div class="icons">
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+                <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+                <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+                <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+              </svg>
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+                <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+                <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+                <circle cx="8" cy="10" r="2"/>
+              </svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+                <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+                <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+                <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Back Button -->
+          <div class="back-overlay">
+            <div class="back-btn-circle">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M15 18L9 12L15 6"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Images -->
+          <div class="carousel-images">
+            <div class="carousel-image">
+              <span class="carousel-placeholder">🏪</span>
+            </div>
+            <div class="carousel-image">
+              <span class="carousel-placeholder">🚗</span>
+            </div>
+            <div class="carousel-image">
+              <span class="carousel-placeholder">🛠️</span>
+            </div>
+          </div>
+
+          <!-- Dots -->
+          <div class="carousel-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+
+        <!-- Store Info Card -->
+        <div class="store-info-card">
+          <div class="store-header">
+            <div>
+              <h1 class="store-name">Fuint汽车服务中心</h1>
+              <div class="store-tags">
+                <span class="store-tag">官方直营</span>
+                <span class="store-tag hot">热门门店</span>
+              </div>
+            </div>
+            <div class="favorite-btn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="info-rows">
+            <div class="info-row">
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <div class="info-content">
+                <div class="info-label">门店地址</div>
+                <div class="info-value">上海市浦东新区张江高科技园区博云路2号</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <div class="info-content">
+                <div class="info-label">营业时间</div>
+                <div class="info-value">周一至周日 09:00 - 21:00</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <div class="info-content">
+                <div class="info-label">联系电话</div>
+                <div class="info-value"><a href="tel:021-88888888">021-88888888</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="action-btn primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+            </svg>
+            一键导航
+          </button>
+          <button class="action-btn secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/>
+            </svg>
+            拨打电话
+          </button>
+        </div>
+
+        <!-- Staff Section -->
+        <h2 class="section-title">专属顾问</h2>
+        <div class="staff-list">
+          <div class="staff-card">
+            <div class="staff-avatar">张</div>
+            <div class="staff-name">张经理</div>
+            <div class="staff-role">销售顾问</div>
+            <div class="wechat-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.5 11C9.33 11 10 10.33 10 9.5C10 8.67 9.33 8 8.5 8C7.67 8 7 8.67 7 9.5C7 10.33 7.67 11 8.5 11Z"/>
+              </svg>
+              添加企微
+            </div>
+          </div>
+          <div class="staff-card">
+            <div class="staff-avatar">李</div>
+            <div class="staff-name">李工</div>
+            <div class="staff-role">技术顾问</div>
+            <div class="wechat-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.5 11C9.33 11 10 10.33 10 9.5C10 8.67 9.33 8 8.5 8C7.67 8 7 8.67 7 9.5C7 10.33 7.67 11 8.5 11Z"/>
+              </svg>
+              添加企微
+            </div>
+          </div>
+          <div class="staff-card">
+            <div class="staff-avatar">王</div>
+            <div class="staff-name">王师傅</div>
+            <div class="staff-role">维修技师</div>
+            <div class="wechat-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.5 11C9.33 11 10 10.33 10 9.5C10 8.67 9.33 8 8.5 8C7.67 8 7 8.67 7 9.5C7 10.33 7.67 11 8.5 11Z"/>
+              </svg>
+              添加企微
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Section -->
+        <h2 class="section-title">当前活动</h2>
+        <div class="activity-list">
+          <div class="activity-card">
+            <div class="activity-icon checkin">📅</div>
+            <div class="activity-info">
+              <div class="activity-name">每日签到</div>
+              <div class="activity-desc">签到领积分，连续签到奖励翻倍</div>
+            </div>
+            <svg class="activity-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+          <div class="activity-card">
+            <div class="activity-icon lottery">🎰</div>
+            <div class="activity-info">
+              <div class="activity-name">幸运扭蛋</div>
+              <div class="activity-desc">抽奖赢好礼，保养券等你拿</div>
+            </div>
+            <svg class="activity-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+          <div class="activity-card">
+            <div class="activity-icon invite">👥</div>
+            <div class="activity-info">
+              <div class="activity-name">邀请有礼</div>
+              <div class="activity-desc">邀请好友注册，双方都有奖励</div>
+            </div>
+            <svg class="activity-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple carousel interaction
+    let currentSlide = 0;
+    const dots = document.querySelectorAll('.dot');
+
+    setInterval(() => {
+      dots[currentSlide].classList.remove('active');
+      currentSlide = (currentSlide + 1) % 3;
+      dots[currentSlide].classList.add('active');
+    }, 3000);
+
+    // Favorite button toggle
+    document.querySelector('.favorite-btn').addEventListener('click', function() {
+      this.classList.toggle('active');
+    });
+  </script>
+</body>
+</html>

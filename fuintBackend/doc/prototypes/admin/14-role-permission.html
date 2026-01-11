@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 角色权限</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .desktop-frame {
+      display: flex;
+    }
+
+    /* Content Layout */
+    .permission-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+    }
+
+    /* Role List Card */
+    .role-list-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      height: fit-content;
+    }
+
+    .role-list-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .role-list-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .add-role-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-md);
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+      transition: var(--transition-fast);
+    }
+
+    .add-role-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .role-list {
+      padding: 12px;
+    }
+
+    .role-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      margin-bottom: 4px;
+    }
+
+    .role-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .role-item.active {
+      background: rgba(10, 132, 255, 0.15);
+    }
+
+    .role-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--glass-bg);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .role-item.active .role-icon {
+      background: var(--primary);
+    }
+
+    .role-info {
+      flex: 1;
+    }
+
+    .role-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .role-desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .role-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      background: var(--glass-bg);
+      padding: 4px 10px;
+      border-radius: var(--radius-md);
+    }
+
+    /* Permission Panel */
+    .permission-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+    }
+
+    .permission-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .permission-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .permission-title h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .permission-badge {
+      padding: 4px 12px;
+      background: rgba(10, 132, 255, 0.15);
+      color: var(--primary);
+      border-radius: var(--radius-lg);
+      font-size: 12px;
+    }
+
+    .permission-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Permission Groups */
+    .permission-body {
+      padding: 24px;
+      max-height: calc(100vh - 280px);
+      overflow-y: auto;
+    }
+
+    .permission-group {
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .permission-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .permission-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-tertiary);
+      cursor: pointer;
+    }
+
+    .permission-group-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .permission-group-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--glass-bg);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .permission-group-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .permission-group-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .permission-group-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .select-all-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .select-all-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    .expand-icon {
+      color: var(--text-tertiary);
+      transition: var(--transition-fast);
+    }
+
+    .permission-group.collapsed .expand-icon {
+      transform: rotate(-90deg);
+    }
+
+    .permission-group-body {
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .permission-group.collapsed .permission-group-body {
+      display: none;
+    }
+
+    .permission-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .permission-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .permission-item.checked {
+      background: rgba(10, 132, 255, 0.1);
+      border: 1px solid rgba(10, 132, 255, 0.3);
+    }
+
+    .permission-checkbox {
+      width: 20px;
+      height: 20px;
+      background: var(--glass-bg);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      font-size: 12px;
+      transition: var(--transition-fast);
+    }
+
+    .permission-item.checked .permission-checkbox {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .permission-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .permission-item.checked .permission-label {
+      color: var(--text-primary);
+    }
+
+    /* Footer Actions */
+    .permission-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-tertiary);
+    }
+
+    .permission-stats {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .permission-stats strong {
+      color: var(--primary);
+    }
+
+    /* Add Role Modal */
+    .role-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .role-modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .role-modal-content {
+      width: 480px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .role-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .role-modal-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .role-modal-close {
+      width: 32px;
+      height: 32px;
+      background: var(--glass-bg);
+      border: none;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .role-modal-body {
+      padding: 24px;
+    }
+
+    .role-form-group {
+      margin-bottom: 20px;
+    }
+
+    .role-form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .role-form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .role-form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .role-form-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .role-form-textarea {
+      height: 100px;
+      resize: none;
+    }
+
+    .role-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-frame">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🚗</div>
+          <div class="logo-text">
+            Fuint
+            <span>管理后台</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">概览</div>
+          <div class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">数据看板</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">商户管理</div>
+          <div class="nav-item">
+            <span class="icon">🏢</span>
+            <span class="label">商家列表</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🏪</span>
+            <span class="label">门店管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">审核中心</div>
+          <div class="nav-item">
+            <span class="icon">📋</span>
+            <span class="label">活动审核</span>
+            <span class="badge">5</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎁</span>
+            <span class="label">奖品审核</span>
+            <span class="badge">3</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">系统设置</div>
+          <div class="nav-item">
+            <span class="icon">⭐</span>
+            <span class="label">会员等级</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">💎</span>
+            <span class="label">积分规则</span>
+          </div>
+          <div class="nav-item active">
+            <span class="icon">👥</span>
+            <span class="label">角色权限</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">⚙️</span>
+            <span class="label">系统设置</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">管</div>
+          <div class="user-info">
+            <div class="user-name">管理员</div>
+            <div class="user-role">超级管理员</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title">角色权限</h1>
+          <div class="breadcrumb">
+            <a href="#">首页</a>
+            <span>/</span>
+            <span>系统设置</span>
+            <span>/</span>
+            <span>角色权限</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="permission-layout">
+          <!-- Role List -->
+          <div class="role-list-card">
+            <div class="role-list-header">
+              <h3>角色列表</h3>
+              <button class="add-role-btn" onclick="openRoleModal()">+</button>
+            </div>
+            <div class="role-list">
+              <div class="role-item active">
+                <div class="role-icon">👑</div>
+                <div class="role-info">
+                  <div class="role-name">超级管理员</div>
+                  <div class="role-desc">系统最高权限</div>
+                </div>
+                <span class="role-count">2人</span>
+              </div>
+              <div class="role-item">
+                <div class="role-icon">🛡️</div>
+                <div class="role-info">
+                  <div class="role-name">运营管理员</div>
+                  <div class="role-desc">日常运营管理</div>
+                </div>
+                <span class="role-count">5人</span>
+              </div>
+              <div class="role-item">
+                <div class="role-icon">📋</div>
+                <div class="role-info">
+                  <div class="role-name">审核专员</div>
+                  <div class="role-desc">活动与奖品审核</div>
+                </div>
+                <span class="role-count">8人</span>
+              </div>
+              <div class="role-item">
+                <div class="role-icon">📊</div>
+                <div class="role-info">
+                  <div class="role-name">数据分析师</div>
+                  <div class="role-desc">数据查看与分析</div>
+                </div>
+                <span class="role-count">3人</span>
+              </div>
+              <div class="role-item">
+                <div class="role-icon">🎨</div>
+                <div class="role-info">
+                  <div class="role-name">内容运营</div>
+                  <div class="role-desc">素材与模板管理</div>
+                </div>
+                <span class="role-count">4人</span>
+              </div>
+              <div class="role-item">
+                <div class="role-icon">👀</div>
+                <div class="role-info">
+                  <div class="role-name">只读角色</div>
+                  <div class="role-desc">仅查看权限</div>
+                </div>
+                <span class="role-count">12人</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Permission Panel -->
+          <div class="permission-panel">
+            <div class="permission-header">
+              <div class="permission-title">
+                <h3>超级管理员</h3>
+                <span class="permission-badge">系统角色</span>
+              </div>
+              <div class="permission-actions">
+                <button class="btn btn-secondary">重置权限</button>
+                <button class="btn btn-primary">保存更改</button>
+              </div>
+            </div>
+
+            <div class="permission-body">
+              <!-- 商户管理 -->
+              <div class="permission-group">
+                <div class="permission-group-header" onclick="toggleGroup(this)">
+                  <div class="permission-group-title">
+                    <div class="permission-group-icon">🏢</div>
+                    <div>
+                      <div class="permission-group-name">商户管理</div>
+                      <div class="permission-group-count">8 项权限</div>
+                    </div>
+                  </div>
+                  <div class="permission-group-toggle">
+                    <button class="select-all-btn">全选</button>
+                    <span class="expand-icon">▼</span>
+                  </div>
+                </div>
+                <div class="permission-group-body">
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">查看商家列表</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">新增商家</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">编辑商家</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">删除商家</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">查看门店列表</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">新增门店</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">编辑门店</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">删除门店</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 审核中心 -->
+              <div class="permission-group">
+                <div class="permission-group-header" onclick="toggleGroup(this)">
+                  <div class="permission-group-title">
+                    <div class="permission-group-icon">📋</div>
+                    <div>
+                      <div class="permission-group-name">审核中心</div>
+                      <div class="permission-group-count">6 项权限</div>
+                    </div>
+                  </div>
+                  <div class="permission-group-toggle">
+                    <button class="select-all-btn">全选</button>
+                    <span class="expand-icon">▼</span>
+                  </div>
+                </div>
+                <div class="permission-group-body">
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">查看活动审核</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">审批活动</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">查看奖品审核</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">审批奖品</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">查看审核历史</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">撤销审核</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 活动配置 -->
+              <div class="permission-group">
+                <div class="permission-group-header" onclick="toggleGroup(this)">
+                  <div class="permission-group-title">
+                    <div class="permission-group-icon">🎰</div>
+                    <div>
+                      <div class="permission-group-name">活动配置</div>
+                      <div class="permission-group-count">9 项权限</div>
+                    </div>
+                  </div>
+                  <div class="permission-group-toggle">
+                    <button class="select-all-btn">全选</button>
+                    <span class="expand-icon">▼</span>
+                  </div>
+                </div>
+                <div class="permission-group-body">
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">签到设置查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">签到设置编辑</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">抽奖设置查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">抽奖设置编辑</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">裂变设置查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">裂变设置编辑</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">活动数据查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">活动数据导出</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">活动统计分析</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 系统设置 -->
+              <div class="permission-group">
+                <div class="permission-group-header" onclick="toggleGroup(this)">
+                  <div class="permission-group-title">
+                    <div class="permission-group-icon">⚙️</div>
+                    <div>
+                      <div class="permission-group-name">系统设置</div>
+                      <div class="permission-group-count">10 项权限</div>
+                    </div>
+                  </div>
+                  <div class="permission-group-toggle">
+                    <button class="select-all-btn">全选</button>
+                    <span class="expand-icon">▼</span>
+                  </div>
+                </div>
+                <div class="permission-group-body">
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">会员等级查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">会员等级编辑</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">积分规则查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">积分规则编辑</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">角色权限查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">角色权限编辑</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">系统配置查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">系统配置编辑</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">操作日志查看</span>
+                  </div>
+                  <div class="permission-item checked">
+                    <div class="permission-checkbox">✓</div>
+                    <span class="permission-label">操作日志导出</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="permission-footer">
+              <div class="permission-stats">
+                已选择 <strong>33</strong> / 33 项权限
+              </div>
+              <div class="permission-actions">
+                <button class="btn btn-secondary">取消</button>
+                <button class="btn btn-primary">保存更改</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Role Modal -->
+  <div class="role-modal" id="roleModal">
+    <div class="role-modal-content">
+      <div class="role-modal-header">
+        <h3>新增角色</h3>
+        <button class="role-modal-close" onclick="closeRoleModal()">×</button>
+      </div>
+      <div class="role-modal-body">
+        <div class="role-form-group">
+          <label class="role-form-label">角色名称</label>
+          <input type="text" class="role-form-input" placeholder="请输入角色名称">
+        </div>
+        <div class="role-form-group">
+          <label class="role-form-label">角色描述</label>
+          <textarea class="role-form-input role-form-textarea" placeholder="请输入角色描述"></textarea>
+        </div>
+        <div class="role-form-group">
+          <label class="role-form-label">复制权限自</label>
+          <select class="role-form-input">
+            <option value="">不复制，从空白开始</option>
+            <option value="admin">超级管理员</option>
+            <option value="operator">运营管理员</option>
+            <option value="auditor">审核专员</option>
+            <option value="analyst">数据分析师</option>
+          </select>
+        </div>
+      </div>
+      <div class="role-modal-footer">
+        <button class="btn btn-secondary" onclick="closeRoleModal()">取消</button>
+        <button class="btn btn-primary">创建角色</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle permission group
+    function toggleGroup(header) {
+      const group = header.parentElement;
+      group.classList.toggle('collapsed');
+    }
+
+    // Permission item click
+    document.querySelectorAll('.permission-item').forEach(item => {
+      item.addEventListener('click', function() {
+        this.classList.toggle('checked');
+        updateStats();
+      });
+    });
+
+    // Update stats
+    function updateStats() {
+      const total = document.querySelectorAll('.permission-item').length;
+      const checked = document.querySelectorAll('.permission-item.checked').length;
+      document.querySelector('.permission-stats strong').textContent = checked;
+    }
+
+    // Select all in group
+    document.querySelectorAll('.select-all-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const group = this.closest('.permission-group');
+        const items = group.querySelectorAll('.permission-item');
+        const allChecked = Array.from(items).every(item => item.classList.contains('checked'));
+
+        items.forEach(item => {
+          if (allChecked) {
+            item.classList.remove('checked');
+          } else {
+            item.classList.add('checked');
+          }
+        });
+        updateStats();
+      });
+    });
+
+    // Role item click
+    document.querySelectorAll('.role-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Modal functions
+    function openRoleModal() {
+      document.getElementById('roleModal').classList.add('show');
+    }
+
+    function closeRoleModal() {
+      document.getElementById('roleModal').classList.remove('show');
+    }
+  </script>
+</body>
+</html>

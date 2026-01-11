@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 积分兑换</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .exchange-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 100px;
+    }
+
+    /* Points Balance Bar */
+    .points-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      margin: 0 16px;
+      border-radius: var(--radius-lg);
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .points-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .points-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .points-text {
+      color: white;
+    }
+
+    .points-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .points-value {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .exchange-record-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Category Tabs */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-tab {
+      padding: 10px 20px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition-fast);
+    }
+
+    .category-tab:hover {
+      background: var(--border-light);
+    }
+
+    .category-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Gift Grid */
+    .gift-section {
+      padding: 0 16px;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .gift-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .gift-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: var(--transition-normal);
+      cursor: pointer;
+    }
+
+    .gift-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+
+    .gift-image {
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      position: relative;
+    }
+
+    .gift-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      padding: 4px 8px;
+      background: var(--accent-red);
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .gift-badge.limited {
+      background: var(--accent-orange);
+    }
+
+    .gift-info {
+      padding: 12px;
+    }
+
+    .gift-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .gift-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .gift-points {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .gift-points-icon {
+      width: 16px;
+      height: 16px;
+      background: var(--accent-gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .gift-points-value {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+
+    .exchange-btn {
+      padding: 6px 12px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .exchange-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .exchange-btn.disabled {
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+      cursor: not-allowed;
+    }
+
+    .gift-stock {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+
+    .gift-stock.low {
+      color: var(--accent-orange);
+    }
+
+    /* Exchange Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      width: 320px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: var(--transition-normal);
+    }
+
+    .modal-overlay.show .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+    }
+
+    .modal-body {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .modal-points {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .modal-points-value {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+
+    .modal-points-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .modal-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .modal-btn.cancel {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+    }
+
+    .modal-btn.confirm {
+      background: var(--primary);
+      border: none;
+      color: white;
+    }
+
+    .modal-btn.confirm:hover {
+      background: var(--primary-dark);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="exchange-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+              <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+              <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">积分兑换</span>
+          <div class="action"></div>
+        </div>
+
+        <!-- Points Balance Bar -->
+        <div class="points-bar">
+          <div class="points-info">
+            <div class="points-icon">💰</div>
+            <div class="points-text">
+              <div class="points-label">可用积分</div>
+              <div class="points-value">2,580</div>
+            </div>
+          </div>
+          <div class="exchange-record-btn">兑换记录</div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+          <div class="category-tab active">全部</div>
+          <div class="category-tab">服务券</div>
+          <div class="category-tab">实物礼品</div>
+          <div class="category-tab">优惠券</div>
+          <div class="category-tab">虚拟商品</div>
+        </div>
+
+        <!-- Gift Grid -->
+        <div class="gift-section">
+          <div class="gift-grid">
+            <div class="gift-card" onclick="showModal()">
+              <div class="gift-image">
+                <span class="gift-badge">热门</span>
+                🎫
+              </div>
+              <div class="gift-info">
+                <div class="gift-name">精洗服务券</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">500</span>
+                  </div>
+                  <button class="exchange-btn">兑换</button>
+                </div>
+                <div class="gift-stock">库存: 128</div>
+              </div>
+            </div>
+
+            <div class="gift-card">
+              <div class="gift-image">
+                <span class="gift-badge limited">限量</span>
+                🧴
+              </div>
+              <div class="gift-info">
+                <div class="gift-name">车载香薰礼盒</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">1200</span>
+                  </div>
+                  <button class="exchange-btn">兑换</button>
+                </div>
+                <div class="gift-stock low">库存: 12</div>
+              </div>
+            </div>
+
+            <div class="gift-card">
+              <div class="gift-image">☕</div>
+              <div class="gift-info">
+                <div class="gift-name">星巴克咖啡券</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">300</span>
+                  </div>
+                  <button class="exchange-btn">兑换</button>
+                </div>
+                <div class="gift-stock">库存: 256</div>
+              </div>
+            </div>
+
+            <div class="gift-card">
+              <div class="gift-image">🎁</div>
+              <div class="gift-info">
+                <div class="gift-name">保养套餐5折券</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">2000</span>
+                  </div>
+                  <button class="exchange-btn">兑换</button>
+                </div>
+                <div class="gift-stock">库存: 50</div>
+              </div>
+            </div>
+
+            <div class="gift-card">
+              <div class="gift-image">🧹</div>
+              <div class="gift-info">
+                <div class="gift-name">内饰清洁服务</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">800</span>
+                  </div>
+                  <button class="exchange-btn">兑换</button>
+                </div>
+                <div class="gift-stock">库存: 88</div>
+              </div>
+            </div>
+
+            <div class="gift-card">
+              <div class="gift-image">🎪</div>
+              <div class="gift-info">
+                <div class="gift-name">电影票两张</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">600</span>
+                  </div>
+                  <button class="exchange-btn">兑换</button>
+                </div>
+                <div class="gift-stock">库存: 200</div>
+              </div>
+            </div>
+
+            <div class="gift-card">
+              <div class="gift-image">🔧</div>
+              <div class="gift-info">
+                <div class="gift-name">免费换机油服务</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">3000</span>
+                  </div>
+                  <button class="exchange-btn disabled">积分不足</button>
+                </div>
+                <div class="gift-stock">库存: 30</div>
+              </div>
+            </div>
+
+            <div class="gift-card">
+              <div class="gift-image">☂️</div>
+              <div class="gift-info">
+                <div class="gift-name">品牌雨伞</div>
+                <div class="gift-footer">
+                  <div class="gift-points">
+                    <span class="gift-points-icon">💰</span>
+                    <span class="gift-points-value">400</span>
+                  </div>
+                  <button class="exchange-btn">兑换</button>
+                </div>
+                <div class="gift-stock">库存: 156</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exchange Modal -->
+        <div class="modal-overlay" id="exchangeModal">
+          <div class="modal-content">
+            <div class="modal-image">🎫</div>
+            <div class="modal-body">
+              <h3 class="modal-title">精洗服务券</h3>
+              <div class="modal-points">
+                <span class="modal-points-value">500</span>
+                <span class="modal-points-label">积分</span>
+              </div>
+              <p class="modal-desc">确认使用500积分兑换此礼品？兑换后不可退还。</p>
+              <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="hideModal()">取消</button>
+                <button class="modal-btn confirm" onclick="confirmExchange()">确认兑换</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showModal() {
+      document.getElementById('exchangeModal').classList.add('show');
+    }
+
+    function hideModal() {
+      document.getElementById('exchangeModal').classList.remove('show');
+    }
+
+    function confirmExchange() {
+      hideModal();
+      alert('兑换成功！请在"我的奖品"中查看');
+    }
+
+    // Tab switching
+    document.querySelectorAll('.category-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelector('.category-tab.active').classList.remove('active');
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

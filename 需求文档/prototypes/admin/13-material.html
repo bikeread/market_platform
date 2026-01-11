@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 素材管理</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .desktop-frame {
+      display: flex;
+    }
+
+    /* Material Filters */
+    .material-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .material-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .material-tab {
+      padding: 10px 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .material-tab:hover {
+      background: var(--bg-hover);
+    }
+
+    .material-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .material-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .view-toggle {
+      display: flex;
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .view-btn {
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .view-btn:hover {
+      color: var(--text-secondary);
+    }
+
+    .view-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Material Grid */
+    .material-grid {
+      display: flex;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+    }
+
+    .material-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      animation: fadeIn 0.4s ease forwards;
+      opacity: 1;
+    }
+
+    .material-card:nth-child(1) { animation-delay: 0.05s; }
+    .material-card:nth-child(2) { animation-delay: 0.1s; }
+    .material-card:nth-child(3) { animation-delay: 0.15s; }
+    .material-card:nth-child(4) { animation-delay: 0.2s; }
+    .material-card:nth-child(5) { animation-delay: 0.25s; }
+    .material-card:nth-child(6) { animation-delay: 0.3s; }
+    .material-card:nth-child(7) { animation-delay: 0.35s; }
+    .material-card:nth-child(8) { animation-delay: 0.4s; }
+    .material-card:nth-child(9) { animation-delay: 0.45s; }
+    .material-card:nth-child(10) { animation-delay: 0.5s; }
+
+    .material-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+
+    .material-card.selected {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.3);
+    }
+
+    .material-preview {
+      position: relative;
+      height: 160px;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .material-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .material-preview-placeholder {
+      font-size: 48px;
+    }
+
+    .material-checkbox {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 24px;
+      height: 24px;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      opacity: 1;
+      transition: var(--transition-fast);
+    }
+
+    .material-card:hover .material-checkbox,
+    .material-card.selected .material-checkbox {
+      opacity: 1;
+    }
+
+    .material-card.selected .material-checkbox {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .material-type-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.6);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: white;
+    }
+
+    .material-info {
+      padding: 16px;
+    }
+
+    .material-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .material-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* Upload Card */
+    .upload-card {
+      background: var(--bg-card);
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-xl);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 220px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .upload-card:hover {
+      border-color: var(--primary);
+      background: rgba(10, 132, 255, 0.05);
+    }
+
+    .upload-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--glass-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 24px;
+      color: var(--primary);
+    }
+
+    .upload-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .upload-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* Batch Actions Bar */
+    .batch-actions {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      box-shadow: var(--shadow-lg);
+      opacity: 1;
+      visibility: hidden;
+      transition: var(--transition-normal);
+    }
+
+    .batch-actions.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .batch-count {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .batch-count strong {
+      color: var(--primary);
+    }
+
+    .batch-btns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .batch-btn {
+      padding: 8px 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .batch-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    .batch-btn.delete {
+      color: var(--accent-red);
+    }
+
+    /* Folder Sidebar */
+    .content-with-sidebar {
+      display: flex;
+      gap: 24px;
+    }
+
+    .folder-sidebar {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    .folder-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+    }
+
+    .folder-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .add-folder-btn {
+      width: 28px;
+      height: 28px;
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .folder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .folder-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .folder-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .folder-item.active {
+      background: rgba(10, 132, 255, 0.15);
+    }
+
+    .folder-item.active .folder-icon {
+      color: var(--primary);
+    }
+
+    .folder-icon {
+      font-size: 18px;
+    }
+
+    .folder-name {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .folder-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .material-main {
+      flex: 1;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--glass-bg);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .stat-info h4 {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .stat-info p {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-frame">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🚗</div>
+          <div class="logo-text">
+            Fuint
+            <span>管理后台</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">概览</div>
+          <div class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">数据看板</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">商户管理</div>
+          <div class="nav-item">
+            <span class="icon">🏢</span>
+            <span class="label">商家列表</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🏪</span>
+            <span class="label">门店管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">审核中心</div>
+          <div class="nav-item">
+            <span class="icon">📋</span>
+            <span class="label">活动审核</span>
+            <span class="badge">5</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎁</span>
+            <span class="label">奖品审核</span>
+            <span class="badge">3</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">素材中心</div>
+          <div class="nav-item active">
+            <span class="icon">🖼️</span>
+            <span class="label">素材管理</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">📝</span>
+            <span class="label">模板管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">系统设置</div>
+          <div class="nav-item">
+            <span class="icon">⭐</span>
+            <span class="label">会员等级</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">💎</span>
+            <span class="label">积分规则</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">⚙️</span>
+            <span class="label">系统设置</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">管</div>
+          <div class="user-info">
+            <div class="user-name">管理员</div>
+            <div class="user-role">超级管理员</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title">素材管理</h1>
+          <div class="breadcrumb">
+            <a href="#">首页</a>
+            <span>/</span>
+            <span>素材中心</span>
+            <span>/</span>
+            <span>素材管理</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            上传素材
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-icon">🖼️</div>
+            <div class="stat-info">
+              <h4>图片素材</h4>
+              <p>1,234</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">🎬</div>
+            <div class="stat-info">
+              <h4>视频素材</h4>
+              <p>56</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">📄</div>
+            <div class="stat-info">
+              <h4>文档素材</h4>
+              <p>89</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">💾</div>
+            <div class="stat-info">
+              <h4>存储空间</h4>
+              <p>2.5 GB / 10 GB</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-with-sidebar">
+          <!-- Folder Sidebar -->
+          <div class="folder-sidebar">
+            <div class="folder-card">
+              <div class="folder-title">
+                素材分类
+                <button class="add-folder-btn">+</button>
+              </div>
+              <div class="folder-list">
+                <div class="folder-item active">
+                  <span class="folder-icon">📁</span>
+                  <span class="folder-name">全部素材</span>
+                  <span class="folder-count">1,379</span>
+                </div>
+                <div class="folder-item">
+                  <span class="folder-icon">🎨</span>
+                  <span class="folder-name">活动Banner</span>
+                  <span class="folder-count">156</span>
+                </div>
+                <div class="folder-item">
+                  <span class="folder-icon">🏪</span>
+                  <span class="folder-name">门店图片</span>
+                  <span class="folder-count">423</span>
+                </div>
+                <div class="folder-item">
+                  <span class="folder-icon">🎁</span>
+                  <span class="folder-name">奖品图片</span>
+                  <span class="folder-count">234</span>
+                </div>
+                <div class="folder-item">
+                  <span class="folder-icon">📣</span>
+                  <span class="folder-name">推广海报</span>
+                  <span class="folder-count">89</span>
+                </div>
+                <div class="folder-item">
+                  <span class="folder-icon">🎬</span>
+                  <span class="folder-name">视频素材</span>
+                  <span class="folder-count">56</span>
+                </div>
+                <div class="folder-item">
+                  <span class="folder-icon">📄</span>
+                  <span class="folder-name">文档模板</span>
+                  <span class="folder-count">89</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Material Main -->
+          <div class="material-main">
+            <!-- Toolbar -->
+            <div class="material-toolbar">
+              <div class="material-tabs">
+                <div class="material-tab active">全部</div>
+                <div class="material-tab">图片</div>
+                <div class="material-tab">视频</div>
+                <div class="material-tab">文档</div>
+              </div>
+              <div class="material-actions">
+                <div class="search-box" style="width: 240px;">
+                  <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                  </svg>
+                  <input type="text" placeholder="搜索素材...">
+                </div>
+                <div class="view-toggle">
+                  <button class="view-btn active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="7" height="7"/>
+                      <rect x="14" y="3" width="7" height="7"/>
+                      <rect x="3" y="14" width="7" height="7"/>
+                      <rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                  </button>
+                  <button class="view-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="8" y1="6" x2="21" y2="6"/>
+                      <line x1="8" y1="12" x2="21" y2="12"/>
+                      <line x1="8" y1="18" x2="21" y2="18"/>
+                      <line x1="3" y1="6" x2="3.01" y2="6"/>
+                      <line x1="3" y1="12" x2="3.01" y2="12"/>
+                      <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Material Grid -->
+            <div class="material-grid">
+              <!-- Upload Card -->
+              <div class="upload-card">
+                <div class="upload-icon">+</div>
+                <div class="upload-text">上传素材</div>
+                <div class="upload-hint">支持 JPG、PNG、MP4</div>
+              </div>
+
+              <!-- Material Cards -->
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">🎨</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">PNG</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">新年活动Banner</div>
+                  <div class="material-meta">
+                    <span>1920×600</span>
+                    <span>256 KB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">🏪</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">JPG</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">门店实景图-01</div>
+                  <div class="material-meta">
+                    <span>1200×800</span>
+                    <span>1.2 MB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">🎁</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">PNG</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">精洗券封面</div>
+                  <div class="material-meta">
+                    <span>800×600</span>
+                    <span>128 KB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">📣</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">PNG</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">邀请海报模板</div>
+                  <div class="material-meta">
+                    <span>750×1334</span>
+                    <span>512 KB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">🎬</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">MP4</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">门店宣传视频</div>
+                  <div class="material-meta">
+                    <span>1080P</span>
+                    <span>25 MB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">🚗</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">PNG</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">汽车美容图标</div>
+                  <div class="material-meta">
+                    <span>512×512</span>
+                    <span>64 KB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">🎰</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">GIF</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">扭蛋机动画</div>
+                  <div class="material-meta">
+                    <span>600×600</span>
+                    <span>2.1 MB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">💎</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">PNG</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">积分图标</div>
+                  <div class="material-meta">
+                    <span>256×256</span>
+                    <span>32 KB</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="material-card">
+                <div class="material-preview">
+                  <div class="material-preview-placeholder">📅</div>
+                  <div class="material-checkbox">✓</div>
+                  <span class="material-type-badge">PNG</span>
+                </div>
+                <div class="material-info">
+                  <div class="material-name">签到日历背景</div>
+                  <div class="material-meta">
+                    <span>750×500</span>
+                    <span>186 KB</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Batch Actions Bar -->
+  <div class="batch-actions" id="batchActions">
+    <span class="batch-count">已选择 <strong>3</strong> 个素材</span>
+    <div class="batch-btns">
+      <button class="batch-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        下载
+      </button>
+      <button class="batch-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        移动到
+      </button>
+      <button class="batch-btn delete">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+        删除
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Material card selection
+    document.querySelectorAll('.material-card').forEach(card => {
+      card.addEventListener('click', function() {
+        this.classList.toggle('selected');
+        updateBatchActions();
+      });
+    });
+
+    function updateBatchActions() {
+      const selected = document.querySelectorAll('.material-card.selected').length;
+      const batchActions = document.getElementById('batchActions');
+      if (selected > 0) {
+        batchActions.classList.add('show');
+        batchActions.querySelector('strong').textContent = selected;
+      } else {
+        batchActions.classList.remove('show');
+      }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.material-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.material-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Folder switching
+    document.querySelectorAll('.folder-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.folder-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // View toggle
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

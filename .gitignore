@@ -1,0 +1,57 @@
+# 依赖目录
+node_modules/
+yarn.lock
+package-lock.json
+
+# Maven 构建输出
+target/
+
+# Electron 构建输出
+dist_electron/
+
+# IDE 配置
+.idea/
+.vscode/
+.hbuilderx/
+*.iml
+*.ipr
+*.iws
+
+# 系统文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# 日志文件
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境配置 (本地)
+.env.local
+.env.*.local
+*.local
+
+# 编译输出 (项目级别)
+/fuintAdmin/dist/
+/fuintCashierWeb/dist/
+
+# Uniapp 编译输出
+/fuintUniapp/unpackage/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 测试覆盖率
+coverage/
+
+# 缓存
+.cache/
+.eslintcache
+.npm

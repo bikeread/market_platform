@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>门店端 - 活动申请</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .apply-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 120px;
+    }
+
+    .apply-content {
+      padding: 0 20px;
+    }
+
+    /* Activity Type Selection */
+    .type-section {
+      margin-bottom: 24px;
+      animation: slideUp 0.5s ease forwards;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .type-card {
+      background: var(--bg-card);
+      border: 2px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 20px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .type-card:hover {
+      border-color: var(--primary);
+    }
+
+    .type-card.selected {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(10, 132, 255, 0.05));
+    }
+
+    .type-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .type-icon.checkin { background: linear-gradient(135deg, rgba(48, 209, 88, 0.2), rgba(48, 209, 88, 0.1)); }
+    .type-icon.lottery { background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1)); }
+    .type-icon.invite { background: linear-gradient(135deg, rgba(191, 90, 242, 0.2), rgba(191, 90, 242, 0.1)); }
+
+    .type-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Form Section */
+    .form-section {
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .input-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .input-wrapper label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper label .required {
+      color: var(--accent-red);
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: var(--transition-fast);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    textarea.input-field {
+      min-height: 100px;
+      resize: none;
+    }
+
+    /* Date Picker */
+    .date-picker {
+      display: flex;
+      gap: 12px;
+    }
+
+    .date-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+    }
+
+    .date-separator {
+      color: var(--text-tertiary);
+    }
+
+    /* Reward Config */
+    .reward-section {
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .reward-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .reward-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .reward-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .reward-remove {
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 69, 58, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--accent-red);
+      font-size: 14px;
+    }
+
+    .reward-inputs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .reward-inputs .input-field {
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .add-reward-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      background: var(--glass-bg);
+      border: 1px dashed var(--glass-border);
+      border-radius: var(--radius-lg);
+      color: var(--primary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .add-reward-btn:hover {
+      background: var(--glass-border);
+    }
+
+    /* Submit Section */
+    .submit-section {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 375px;
+      padding: 20px;
+      background: linear-gradient(to top, var(--bg-primary), transparent);
+      z-index: 50;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .submit-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="apply-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">申请活动</span>
+          <div class="action"></div>
+        </div>
+
+        <div class="apply-content">
+          <!-- Activity Type -->
+          <div class="type-section">
+            <h3 class="section-title">选择活动类型</h3>
+            <div class="type-grid">
+              <div class="type-card selected">
+                <div class="type-icon checkin">📅</div>
+                <span class="type-name">签到活动</span>
+              </div>
+              <div class="type-card">
+                <div class="type-icon lottery">🎰</div>
+                <span class="type-name">抽奖活动</span>
+              </div>
+              <div class="type-card">
+                <div class="type-icon invite">👥</div>
+                <span class="type-name">邀请活动</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Basic Info -->
+          <div class="form-section">
+            <h3 class="section-title">基本信息</h3>
+
+            <div class="input-wrapper">
+              <label>活动名称 <span class="required">*</span></label>
+              <input type="text" class="input-field" placeholder="请输入活动名称">
+            </div>
+
+            <div class="input-wrapper">
+              <label>活动说明 <span class="required">*</span></label>
+              <textarea class="input-field" placeholder="请输入活动规则说明..."></textarea>
+            </div>
+
+            <div class="input-wrapper">
+              <label>活动时间 <span class="required">*</span></label>
+              <div class="date-picker">
+                <div class="date-input">
+                  <span>📅</span>
+                  <span>2025-01-20</span>
+                </div>
+                <span class="date-separator">至</span>
+                <div class="date-input">
+                  <span>📅</span>
+                  <span>2025-02-15</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rewards -->
+          <div class="reward-section">
+            <h3 class="section-title">奖励设置</h3>
+
+            <div class="reward-card">
+              <div class="reward-header">
+                <span class="reward-title">奖励规则 1</span>
+                <div class="reward-remove">×</div>
+              </div>
+              <div class="reward-inputs">
+                <input type="text" class="input-field" placeholder="签到天数">
+                <input type="text" class="input-field" placeholder="奖励积分">
+              </div>
+            </div>
+
+            <div class="reward-card">
+              <div class="reward-header">
+                <span class="reward-title">奖励规则 2</span>
+                <div class="reward-remove">×</div>
+              </div>
+              <div class="reward-inputs">
+                <input type="text" class="input-field" placeholder="签到天数" value="7">
+                <input type="text" class="input-field" placeholder="奖励积分" value="100">
+              </div>
+            </div>
+
+            <div class="add-reward-btn">
+              <span>➕</span>
+              添加奖励规则
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-section">
+          <button class="submit-btn">提交申请</button>
+          <p class="submit-hint">提交后将由平台审核，预计1-3个工作日</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Type selection
+    document.querySelectorAll('.type-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelector('.type-card.selected').classList.remove('selected');
+        this.classList.add('selected');
+      });
+    });
+  </script>
+</body>
+</html>

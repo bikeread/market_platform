@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 登录</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: var(--bg-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-container {
+      width: 1440px;
+      height: 900px;
+      display: flex;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Left Panel - Branding */
+    .login-left {
+      flex: 1;
+      background: linear-gradient(135deg, #0A84FF 0%, #0055AA 100%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+      overflow: hidden;
+    }
+
+    .login-left::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+
+    .login-left::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -30%;
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+    }
+
+    .brand-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .brand-logo .icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(255,255,255,0.2);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand-logo .text {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .brand-slogan {
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.3;
+      margin-bottom: 24px;
+    }
+
+    .brand-desc {
+      font-size: 18px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.6;
+      max-width: 400px;
+    }
+
+    /* Feature List */
+    .feature-list {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255,255,255,0.9);
+      font-size: 15px;
+    }
+
+    .feature-item .check {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Right Panel - Login Form */
+    .login-right {
+      width: 560px;
+      padding: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--bg-secondary);
+    }
+
+    .login-header {
+      margin-bottom: 40px;
+    }
+
+    .login-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .login-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    /* Login Form */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      transition: var(--transition-fast);
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .input-wrapper .icon {
+      color: var(--text-tertiary);
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 15px;
+    }
+
+    .input-wrapper input::placeholder {
+      color: var(--text-placeholder);
+    }
+
+    .input-wrapper .toggle {
+      cursor: pointer;
+      color: var(--text-tertiary);
+      transition: var(--transition-fast);
+    }
+
+    .input-wrapper .toggle:hover {
+      color: var(--text-secondary);
+    }
+
+    /* Captcha Row */
+    .captcha-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .captcha-row .input-wrapper {
+      flex: 1;
+    }
+
+    .captcha-image {
+      width: 120px;
+      height: 54px;
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-hover));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 20px;
+      letter-spacing: 4px;
+      color: var(--primary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Remember & Forgot */
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+    }
+
+    .checkbox.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .checkbox-wrapper span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .forgot-link {
+      font-size: 14px;
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition-fast);
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Login Button */
+    .login-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(10, 132, 255, 0.5);
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--text-tertiary);
+      font-size: 13px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    /* Alternative Login */
+    .alt-login {
+      display: flex;
+      gap: 16px;
+    }
+
+    .alt-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .alt-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-light);
+    }
+
+    /* Footer */
+    .login-footer {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .footer-link {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* Animations */
+    .login-left .brand-content > * {
+      animation: slideLeft 0.6s ease forwards;
+      opacity: 0;
+    }
+
+    .brand-logo { animation-delay: 0.1s; }
+    .brand-slogan { animation-delay: 0.2s; }
+    .brand-desc { animation-delay: 0.3s; }
+    .feature-list { animation-delay: 0.4s; }
+
+    .login-right > * {
+      animation: slideUp 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    .login-header { animation-delay: 0.2s; }
+    .login-form { animation-delay: 0.3s; }
+    .login-footer { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Left Panel -->
+    <div class="login-left">
+      <div class="brand-content">
+        <div class="brand-logo">
+          <div class="icon">🚗</div>
+          <span class="text">Fuint</span>
+        </div>
+        <h1 class="brand-slogan">汽车会员<br>营销管理平台</h1>
+        <p class="brand-desc">一站式会员管理解决方案，助力汽车服务商家数字化转型，提升客户忠诚度与复购率</p>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="check">✓</span>
+            多门店统一管理
+          </div>
+          <div class="feature-item">
+            <span class="check">✓</span>
+            智能营销活动配置
+          </div>
+          <div class="feature-item">
+            <span class="check">✓</span>
+            实时数据分析看板
+          </div>
+          <div class="feature-item">
+            <span class="check">✓</span>
+            企业微信深度整合
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="login-right">
+      <div class="login-header">
+        <h2 class="login-title">欢迎回来</h2>
+        <p class="login-subtitle">请登录您的管理员账号</p>
+      </div>
+
+      <form class="login-form">
+        <div class="input-group">
+          <label class="input-label">账号</label>
+          <div class="input-wrapper">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <input type="text" placeholder="请输入账号">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">密码</label>
+          <div class="input-wrapper">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+            <input type="password" placeholder="请输入密码">
+            <svg class="toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">验证码</label>
+          <div class="captcha-row">
+            <div class="input-wrapper">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M9 9h.01M15 9h.01M9 15h6"/>
+              </svg>
+              <input type="text" placeholder="请输入验证码" maxlength="4">
+            </div>
+            <div class="captcha-image" onclick="this.textContent='X7K9'">A3M5</div>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-wrapper" onclick="this.querySelector('.checkbox').classList.toggle('checked')">
+            <div class="checkbox">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span>记住我</span>
+          </label>
+          <a href="#" class="forgot-link">忘记密码？</a>
+        </div>
+
+        <button type="button" class="login-btn">登 录</button>
+
+        <div class="divider">或</div>
+
+        <div class="alt-login">
+          <button type="button" class="alt-btn">
+            <span>💬</span>
+            企业微信登录
+          </button>
+          <button type="button" class="alt-btn">
+            <span>📱</span>
+            短信验证登录
+          </button>
+        </div>
+      </form>
+
+      <div class="login-footer">
+        <p class="footer-text">
+          登录即表示同意 <a href="#" class="footer-link">服务条款</a> 和 <a href="#" class="footer-link">隐私政策</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

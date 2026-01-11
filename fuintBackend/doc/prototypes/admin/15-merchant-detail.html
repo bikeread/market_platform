@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, height=900">
+  <title>Fuint 管理后台 - 商家详情</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .desktop-frame {
+      display: flex;
+    }
+
+    /* Back Link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .back-link:hover {
+      color: var(--primary);
+    }
+
+    /* Merchant Header Card */
+    .merchant-header-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 32px;
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    .merchant-avatar {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      flex-shrink: 0;
+    }
+
+    .merchant-main-info {
+      flex: 1;
+    }
+
+    .merchant-title-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .merchant-name {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .merchant-status {
+      padding: 6px 16px;
+      border-radius: var(--radius-lg);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .merchant-status.active {
+      background: rgba(48, 209, 88, 0.15);
+      color: var(--accent-green);
+    }
+
+    .merchant-status.inactive {
+      background: rgba(255, 69, 58, 0.15);
+      color: var(--accent-red);
+    }
+
+    .merchant-meta {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 20px;
+    }
+
+    .merchant-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .merchant-meta-item .icon {
+      font-size: 16px;
+    }
+
+    .merchant-stats {
+      display: flex;
+      gap: 48px;
+    }
+
+    .merchant-stat {
+      text-align: center;
+    }
+
+    .merchant-stat-value {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .merchant-stat-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .merchant-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    /* Tabs */
+    .detail-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .detail-tab {
+      padding: 12px 24px;
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .detail-tab:hover {
+      background: var(--bg-hover);
+    }
+
+    .detail-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Content Grid */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+
+    /* Info Card */
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      animation: slideUp 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    .info-card:nth-child(1) { animation-delay: 0.1s; }
+    .info-card:nth-child(2) { animation-delay: 0.15s; }
+    .info-card:nth-child(3) { animation-delay: 0.2s; }
+
+    .info-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .info-card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .info-card-body {
+      padding: 24px;
+    }
+
+    /* Info List */
+    .info-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .info-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .info-value a {
+      color: var(--primary);
+    }
+
+    /* Store List */
+    .store-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .store-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      transition: var(--transition-fast);
+    }
+
+    .store-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .store-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--glass-bg);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .store-info {
+      flex: 1;
+    }
+
+    .store-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .store-address {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .store-status {
+      padding: 4px 10px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+    }
+
+    .store-status.open {
+      background: rgba(48, 209, 88, 0.15);
+      color: var(--accent-green);
+    }
+
+    .store-status.closed {
+      background: rgba(255, 69, 58, 0.15);
+      color: var(--accent-red);
+    }
+
+    /* Activity Card */
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      margin-bottom: 12px;
+    }
+
+    .activity-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .activity-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--glass-bg);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .activity-info {
+      flex: 1;
+    }
+
+    .activity-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .activity-time {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .activity-status {
+      padding: 4px 10px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+    }
+
+    .activity-status.running {
+      background: rgba(48, 209, 88, 0.15);
+      color: var(--accent-green);
+    }
+
+    .activity-status.pending {
+      background: rgba(255, 214, 10, 0.15);
+      color: var(--accent-yellow);
+    }
+
+    /* Sidebar Cards */
+    .sidebar-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .quick-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 16px;
+      background: var(--bg-tertiary);
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .quick-action-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    .quick-action-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--glass-bg);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .quick-action-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -24px;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      background: var(--bg-card);
+      border: 3px solid var(--primary);
+      border-radius: 50%;
+    }
+
+    .timeline-content {
+      background: var(--bg-tertiary);
+      padding: 12px 16px;
+      border-radius: var(--radius-lg);
+    }
+
+    .timeline-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .timeline-time {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-frame">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🚗</div>
+          <div class="logo-text">
+            Fuint
+            <span>管理后台</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">概览</div>
+          <div class="nav-item">
+            <span class="icon">📊</span>
+            <span class="label">数据看板</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">商户管理</div>
+          <div class="nav-item active">
+            <span class="icon">🏢</span>
+            <span class="label">商家列表</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🏪</span>
+            <span class="label">门店管理</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">审核中心</div>
+          <div class="nav-item">
+            <span class="icon">📋</span>
+            <span class="label">活动审核</span>
+            <span class="badge">5</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">🎁</span>
+            <span class="label">奖品审核</span>
+            <span class="badge">3</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">系统设置</div>
+          <div class="nav-item">
+            <span class="icon">⭐</span>
+            <span class="label">会员等级</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">💎</span>
+            <span class="label">积分规则</span>
+          </div>
+          <div class="nav-item">
+            <span class="icon">⚙️</span>
+            <span class="label">系统设置</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">管</div>
+          <div class="user-info">
+            <div class="user-name">管理员</div>
+            <div class="user-role">超级管理员</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <h1 class="page-title">商家详情</h1>
+          <div class="breadcrumb">
+            <a href="#">首页</a>
+            <span>/</span>
+            <a href="#">商户管理</a>
+            <span>/</span>
+            <a href="#">商家列表</a>
+            <span>/</span>
+            <span>商家详情</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Back Link -->
+        <div class="back-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          返回商家列表
+        </div>
+
+        <!-- Merchant Header -->
+        <div class="merchant-header-card">
+          <div class="merchant-avatar">🚙</div>
+          <div class="merchant-main-info">
+            <div class="merchant-title-row">
+              <h1 class="merchant-name">星辰汽车服务</h1>
+              <span class="merchant-status active">正常营业</span>
+            </div>
+            <div class="merchant-meta">
+              <div class="merchant-meta-item">
+                <span class="icon">📍</span>
+                北京市朝阳区
+              </div>
+              <div class="merchant-meta-item">
+                <span class="icon">📞</span>
+                400-888-8888
+              </div>
+              <div class="merchant-meta-item">
+                <span class="icon">📅</span>
+                入驻时间: 2024-01-15
+              </div>
+            </div>
+            <div class="merchant-stats">
+              <div class="merchant-stat">
+                <div class="merchant-stat-value">3</div>
+                <div class="merchant-stat-label">门店数量</div>
+              </div>
+              <div class="merchant-stat">
+                <div class="merchant-stat-value">12,560</div>
+                <div class="merchant-stat-label">会员总数</div>
+              </div>
+              <div class="merchant-stat">
+                <div class="merchant-stat-value">8</div>
+                <div class="merchant-stat-label">进行中活动</div>
+              </div>
+              <div class="merchant-stat">
+                <div class="merchant-stat-value">¥856K</div>
+                <div class="merchant-stat-label">累计营收</div>
+              </div>
+            </div>
+          </div>
+          <div class="merchant-actions">
+            <button class="btn btn-primary">编辑信息</button>
+            <button class="btn btn-secondary">暂停营业</button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="detail-tabs">
+          <div class="detail-tab active">基本信息</div>
+          <div class="detail-tab">门店列表</div>
+          <div class="detail-tab">活动管理</div>
+          <div class="detail-tab">数据统计</div>
+          <div class="detail-tab">操作日志</div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="detail-grid">
+          <div class="main-column">
+            <!-- Basic Info Card -->
+            <div class="info-card" style="margin-bottom: 24px;">
+              <div class="info-card-header">
+                <h3 class="info-card-title">基本信息</h3>
+                <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">编辑</button>
+              </div>
+              <div class="info-card-body">
+                <div class="info-list">
+                  <div class="info-item">
+                    <span class="info-label">商家名称</span>
+                    <span class="info-value">星辰汽车服务</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">商家ID</span>
+                    <span class="info-value">M2024011500001</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">联系人</span>
+                    <span class="info-value">张经理</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">联系电话</span>
+                    <span class="info-value">138-8888-8888</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">客服电话</span>
+                    <span class="info-value">400-888-8888</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">电子邮箱</span>
+                    <span class="info-value"><a href="#">contact@xingchen.com</a></span>
+                  </div>
+                  <div class="info-item full">
+                    <span class="info-label">注册地址</span>
+                    <span class="info-value">北京市朝阳区建国路88号SOHO现代城B座1502</span>
+                  </div>
+                  <div class="info-item full">
+                    <span class="info-label">商家简介</span>
+                    <span class="info-value">星辰汽车服务是一家专业的汽车美容养护连锁品牌，致力于为车主提供高品质的汽车护理服务，包括精洗、镀晶、贴膜、改色等多种服务项目。</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Store List Card -->
+            <div class="info-card">
+              <div class="info-card-header">
+                <h3 class="info-card-title">门店列表</h3>
+                <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">添加门店</button>
+              </div>
+              <div class="info-card-body">
+                <div class="store-list">
+                  <div class="store-item">
+                    <div class="store-icon">🏪</div>
+                    <div class="store-info">
+                      <div class="store-name">朝阳旗舰店</div>
+                      <div class="store-address">北京市朝阳区建国路88号</div>
+                    </div>
+                    <span class="store-status open">营业中</span>
+                  </div>
+                  <div class="store-item">
+                    <div class="store-icon">🏪</div>
+                    <div class="store-info">
+                      <div class="store-name">海淀科技园店</div>
+                      <div class="store-address">北京市海淀区中关村软件园二期</div>
+                    </div>
+                    <span class="store-status open">营业中</span>
+                  </div>
+                  <div class="store-item">
+                    <div class="store-icon">🏪</div>
+                    <div class="store-info">
+                      <div class="store-name">通州万达店</div>
+                      <div class="store-address">北京市通州区万达广场B1层</div>
+                    </div>
+                    <span class="store-status closed">休息中</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-cards">
+            <!-- Quick Actions -->
+            <div class="info-card">
+              <div class="info-card-header">
+                <h3 class="info-card-title">快捷操作</h3>
+              </div>
+              <div class="info-card-body">
+                <div class="quick-actions">
+                  <button class="quick-action-btn">
+                    <div class="quick-action-icon">📊</div>
+                    <span class="quick-action-label">数据报表</span>
+                  </button>
+                  <button class="quick-action-btn">
+                    <div class="quick-action-icon">🎰</div>
+                    <span class="quick-action-label">活动管理</span>
+                  </button>
+                  <button class="quick-action-btn">
+                    <div class="quick-action-icon">👥</div>
+                    <span class="quick-action-label">会员管理</span>
+                  </button>
+                  <button class="quick-action-btn">
+                    <div class="quick-action-icon">💰</div>
+                    <span class="quick-action-label">财务结算</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Activities -->
+            <div class="info-card">
+              <div class="info-card-header">
+                <h3 class="info-card-title">进行中活动</h3>
+              </div>
+              <div class="info-card-body">
+                <div class="activity-item">
+                  <div class="activity-icon">📅</div>
+                  <div class="activity-info">
+                    <div class="activity-name">每日签到送积分</div>
+                    <div class="activity-time">长期有效</div>
+                  </div>
+                  <span class="activity-status running">进行中</span>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon">🎰</div>
+                  <div class="activity-info">
+                    <div class="activity-name">新年扭蛋机</div>
+                    <div class="activity-time">2025.01.01-01.31</div>
+                  </div>
+                  <span class="activity-status running">进行中</span>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon">👥</div>
+                  <div class="activity-info">
+                    <div class="activity-name">邀请好友得好礼</div>
+                    <div class="activity-time">待审核</div>
+                  </div>
+                  <span class="activity-status pending">待审核</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Operation Timeline -->
+            <div class="info-card">
+              <div class="info-card-header">
+                <h3 class="info-card-title">最近操作</h3>
+              </div>
+              <div class="info-card-body">
+                <div class="timeline">
+                  <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">提交新活动审核</div>
+                      <div class="timeline-time">今天 14:30</div>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">更新门店信息</div>
+                      <div class="timeline-time">昨天 16:45</div>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">新增奖品配置</div>
+                      <div class="timeline-time">3天前 10:20</div>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">完成入驻申请</div>
+                      <div class="timeline-time">2024-01-15</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.detail-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

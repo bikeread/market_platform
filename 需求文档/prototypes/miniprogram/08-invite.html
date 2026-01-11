@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=375, height=812, initial-scale=1.0">
+  <title>Fuint - 邀请注册</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .invite-screen {
+      height: 100%;
+      background: var(--bg-primary);
+      padding-bottom: 40px;
+    }
+
+    /* QR Code Section */
+    .qr-section {
+      padding: 32px 24px;
+      text-align: center;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .qr-card {
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-tertiary));
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      border: 1px solid var(--border-light);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .qr-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    }
+
+    .qr-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .qr-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* QR Code Display */
+    .qr-code-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .qr-code {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(90deg, #000 2px, transparent 2px) 0 0 / 10px 10px,
+        linear-gradient(#000 2px, transparent 2px) 0 0 / 10px 10px;
+      position: relative;
+    }
+
+    .qr-code::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 8px, #000 8px, #000 10px),
+        repeating-linear-gradient(90deg, transparent, transparent 8px, #000 8px, #000 10px);
+      opacity: 0.8;
+    }
+
+    .qr-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+    }
+
+    .qr-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+    }
+
+    /* Stats Section */
+    .stats-section {
+      display: flex;
+      gap: 12px;
+      padding: 0 24px;
+      margin-bottom: 24px;
+      animation: slideUp 0.5s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border-light);
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Actions */
+    .action-buttons {
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+      animation: slideUp 0.5s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: var(--shadow-glow);
+      transition: var(--transition-normal);
+    }
+
+    .btn-save:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-share {
+      width: 100%;
+      padding: 18px;
+      background: #07C160;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: var(--transition-normal);
+    }
+
+    .btn-share:hover {
+      background: #06AD56;
+      transform: translateY(-2px);
+    }
+
+    /* Invite Records */
+    .records-section {
+      padding: 0 24px;
+      animation: slideUp 0.5s ease 0.3s forwards;
+      opacity: 0;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .invite-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .invite-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .invite-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: white;
+      font-weight: 600;
+    }
+
+    .invite-info {
+      flex: 1;
+    }
+
+    .invite-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .invite-time {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .invite-badge {
+      padding: 6px 12px;
+      background: rgba(48, 209, 88, 0.2);
+      color: var(--accent-green);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* Rules Section */
+    .rules-section {
+      margin: 24px;
+      padding: 20px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      animation: slideUp 0.5s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    .rules-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rules-title::before {
+      content: '📋';
+    }
+
+    .rules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .rule-number {
+      width: 20px;
+      height: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="invite-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+              <path d="M1 4.5C1 3.67 1.67 3 2.5 3H4.5C5.33 3 6 3.67 6 4.5V10.5C6 11.33 5.33 12 4.5 12H2.5C1.67 12 1 11.33 1 10.5V4.5Z"/>
+              <path d="M7 2.5C7 1.67 7.67 1 8.5 1H10.5C11.33 1 12 1.67 12 2.5V10.5C12 11.33 11.33 12 10.5 12H8.5C7.67 12 7 11.33 7 10.5V2.5Z"/>
+              <path d="M13 0.5C13 0.22 13.22 0 13.5 0H15.5C15.78 0 16 0.22 16 0.5V10.5C16 11.33 15.33 12 14.5 12H14.5C13.67 12 13 11.33 13 10.5V0.5Z"/>
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+              <path d="M8 2.4C10.6 2.4 12.9 3.5 14.5 5.3L16 3.8C14 1.5 11.2 0 8 0C4.8 0 2 1.5 0 3.8L1.5 5.3C3.1 3.5 5.4 2.4 8 2.4Z"/>
+              <path d="M8 6.4C9.5 6.4 10.9 7 11.9 8L13.4 6.5C12 5.1 10.1 4.2 8 4.2C5.9 4.2 4 5.1 2.6 6.5L4.1 8C5.1 7 6.5 6.4 8 6.4Z"/>
+              <circle cx="8" cy="10" r="2"/>
+            </svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" fill="none"/>
+              <rect x="2" y="2" width="17" height="8" rx="1" fill="white"/>
+              <path d="M23 4V8C24 7.5 24 4.5 23 4Z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Nav Bar -->
+        <div class="nav-bar">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18L9 12L15 6"/>
+            </svg>
+          </div>
+          <span class="title">邀请注册</span>
+          <div class="action"></div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="qr-section">
+          <div class="qr-card">
+            <h2 class="qr-title">我的专属邀请码</h2>
+            <p class="qr-subtitle">扫描二维码，注册成为会员</p>
+
+            <div class="qr-code-wrapper">
+              <div class="qr-code">
+                <div class="qr-logo">F</div>
+              </div>
+            </div>
+
+            <div class="qr-hint">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              长按保存图片，分享给好友
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-value">12</div>
+            <div class="stat-label">已邀请人数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">850</div>
+            <div class="stat-label">获得积分</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="btn-save">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            保存二维码
+          </button>
+          <button class="btn-share">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8.5 11C9.33 11 10 10.33 10 9.5C10 8.67 9.33 8 8.5 8C7.67 8 7 8.67 7 9.5C7 10.33 7.67 11 8.5 11ZM15.5 11C16.33 11 17 10.33 17 9.5C17 8.67 16.33 8 15.5 8C14.67 8 14 8.67 14 9.5C14 10.33 14.67 11 15.5 11ZM12 2C6.48 2 2 5.58 2 10C2 12.4 3.21 14.54 5.14 16L4 20L8.5 18C9.61 18.33 10.78 18.5 12 18.5C17.52 18.5 22 14.92 22 10.5C22 6.08 17.52 2.5 12 2.5V2Z"/>
+            </svg>
+            分享给好友
+          </button>
+        </div>
+
+        <!-- Invite Records -->
+        <div class="records-section">
+          <div class="section-header">
+            <h3 class="section-title">邀请记录</h3>
+          </div>
+
+          <div class="invite-list">
+            <div class="invite-item">
+              <div class="invite-avatar">王</div>
+              <div class="invite-info">
+                <div class="invite-name">王**</div>
+                <div class="invite-time">2025-01-06 15:23</div>
+              </div>
+              <span class="invite-badge">+50积分</span>
+            </div>
+            <div class="invite-item">
+              <div class="invite-avatar">李</div>
+              <div class="invite-info">
+                <div class="invite-name">李**</div>
+                <div class="invite-time">2025-01-05 10:08</div>
+              </div>
+              <span class="invite-badge">+50积分</span>
+            </div>
+            <div class="invite-item">
+              <div class="invite-avatar">张</div>
+              <div class="invite-info">
+                <div class="invite-name">张**</div>
+                <div class="invite-time">2025-01-04 18:45</div>
+              </div>
+              <span class="invite-badge">+50积分</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rules Section -->
+        <div class="rules-section">
+          <h3 class="rules-title">活动规则</h3>
+          <div class="rules-list">
+            <div class="rule-item">
+              <span class="rule-number">1</span>
+              <span>分享专属二维码给好友，好友扫码注册成功后，您将获得50积分奖励</span>
+            </div>
+            <div class="rule-item">
+              <span class="rule-number">2</span>
+              <span>被邀请人完成首次消费后，邀请人额外获得100积分</span>
+            </div>
+            <div class="rule-item">
+              <span class="rule-number">3</span>
+              <span>每日邀请上限为10人，超出部分不计算奖励</span>
+            </div>
+            <div class="rule-item">
+              <span class="rule-number">4</span>
+              <span>积分奖励将在好友注册成功后24小时内到账</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
