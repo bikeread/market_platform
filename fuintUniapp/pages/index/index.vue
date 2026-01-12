@@ -10,6 +10,19 @@
       <block>
           <HomeNav v-if="storeInfo && navigation.length > 0" :navigation="navigation"/>
       </block>
+      <!-- 活动中心入口 -->
+      <block>
+          <view class="activity-entry" @click="goToActivityCenter">
+              <view class="activity-content">
+                  <text class="activity-icon">🎡</text>
+                  <view class="activity-info">
+                      <text class="activity-title">营销活动中心</text>
+                      <text class="activity-desc">15款互动抽奖游戏</text>
+                  </view>
+                  <text class="activity-arrow">›</text>
+              </view>
+          </view>
+      </block>
       <block>
           <Goods v-if="storeInfo" :itemStyle="goodsStyle" :isReflash="isReflash" ref="mescrollItem" :params="goodsParams"/>
       </block>
@@ -101,7 +114,14 @@
     },
 
     methods: {
-        
+
+        /**
+         * 跳转活动中心
+         */
+        goToActivityCenter() {
+            uni.navigateTo({ url: '/activityPages/index/index' })
+        },
+
         /**
          * 加载页面数据
          * @param {Object} callback
@@ -193,3 +213,47 @@
 
   }
 </script>
+
+<style lang="scss" scoped>
+.activity-entry {
+    margin: 20rpx 10rpx;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 16rpx;
+    box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+    overflow: hidden;
+
+    .activity-content {
+        display: flex;
+        align-items: center;
+        padding: 30rpx;
+    }
+
+    .activity-icon {
+        font-size: 64rpx;
+        margin-right: 24rpx;
+    }
+
+    .activity-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .activity-title {
+            font-size: 32rpx;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 8rpx;
+        }
+
+        .activity-desc {
+            font-size: 24rpx;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    }
+
+    .activity-arrow {
+        font-size: 48rpx;
+        color: rgba(255, 255, 255, 0.8);
+    }
+}
+</style>

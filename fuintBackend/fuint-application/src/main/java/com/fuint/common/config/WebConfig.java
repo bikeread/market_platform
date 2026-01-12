@@ -29,7 +29,10 @@ public class WebConfig extends WebMvcConfigurationSupport {
                 .resourceChain(false)
                 .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"))
                 .addTransformer(new CssLinkResourceTransformer());
-        registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+
+        // 静态资源：同时支持classpath和外部文件系统
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/static/", "file:./static/");
 
         registry.addResourceHandler("/**").addResourceLocations(
                 "classpath:/static/");

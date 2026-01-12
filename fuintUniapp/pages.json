@@ -500,15 +500,148 @@
              "navigationBarTitleText": "编辑员工"
            }
          }]
+  },
+  {
+     "root": "activityPages",
+     "pages": [
+         {
+           "path": "index/index",
+           "style": {
+             "navigationBarTitleText": "活动中心",
+             "navigationBarBackgroundColor": "#1a1a2e",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "lucky-wheel/index",
+           "style": {
+             "navigationBarTitleText": "幸运大转盘",
+             "navigationBarBackgroundColor": "#667eea",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "slot-machine/index",
+           "style": {
+             "navigationBarTitleText": "老虎机",
+             "navigationBarBackgroundColor": "#1a1a2e",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "golden-egg/index",
+           "style": {
+             "navigationBarTitleText": "砸金蛋",
+             "navigationBarBackgroundColor": "#8B0000",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "scratch-card/index",
+           "style": {
+             "navigationBarTitleText": "刮刮卡",
+             "navigationBarBackgroundColor": "#11998e",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "nine-grid/index",
+           "style": {
+             "navigationBarTitleText": "九宫格抽奖",
+             "navigationBarBackgroundColor": "#ee0979",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "lucky-key/index",
+           "style": {
+             "navigationBarTitleText": "幸运钥匙",
+             "navigationBarBackgroundColor": "#4776E6",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "shake-it/index",
+           "style": {
+             "navigationBarTitleText": "摇一摇",
+             "navigationBarBackgroundColor": "#00c6ff",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "red-packet/index",
+           "style": {
+             "navigationBarTitleText": "红包雨",
+             "navigationBarBackgroundColor": "#ff416c",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "flip-card/index",
+           "style": {
+             "navigationBarTitleText": "翻牌配对",
+             "navigationBarBackgroundColor": "#654ea3",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "gacha/index",
+           "style": {
+             "navigationBarTitleText": "幸运扭蛋",
+             "navigationBarBackgroundColor": "#a8edea",
+             "navigationBarTextStyle": "black"
+           }
+         },
+         {
+           "path": "steering-wheel/index",
+           "style": {
+             "navigationBarTitleText": "方向盘转转转",
+             "navigationBarBackgroundColor": "#1a1a2e",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "gas-station/index",
+           "style": {
+             "navigationBarTitleText": "加油站挑战",
+             "navigationBarBackgroundColor": "#f7971e",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "race-track/index",
+           "style": {
+             "navigationBarTitleText": "赛道冲刺",
+             "navigationBarBackgroundColor": "#1a1a2e",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "card-collection/index",
+           "style": {
+             "navigationBarTitleText": "集卡兑奖",
+             "navigationBarBackgroundColor": "#56ab2f",
+             "navigationBarTextStyle": "white"
+           }
+         },
+         {
+           "path": "lucky-plate/index",
+           "style": {
+             "navigationBarTitleText": "幸运车牌",
+             "navigationBarBackgroundColor": "#2c3e50",
+             "navigationBarTextStyle": "white"
+           }
+         }
+    ]
   }],
   "preloadRule": {
        "pages/index/index": {
           "network": "all",
-          "packages": ["subPages"]
+          "packages": ["subPages", "activityPages"]
        },
        "pages/user/index": {
           "network": "all",
-          "packages": ["merchantPages"]
+          "packages": ["merchantPages", "activityPages"]
        }
   },
   "globalStyle": {
