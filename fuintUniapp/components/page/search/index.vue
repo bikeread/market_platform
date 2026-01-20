@@ -33,7 +33,7 @@
        * 跳转到搜索页面
        */
       onTargetSearch() {
-        this.$navTo('pages/search/index')
+        this.$navTo('pagesA/search/index')
       }
 
     }

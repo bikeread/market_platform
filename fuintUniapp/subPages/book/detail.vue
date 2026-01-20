@@ -80,7 +80,7 @@
             },
             // 切换门店
             toMoreStore() {
-               this.$navTo('pages/location/index');
+               this.$navTo('pagesA/location/index');
             },
             // 获取店铺详情
             getStoreInfo() {

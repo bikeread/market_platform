@@ -42,7 +42,7 @@
             },
             // 跳转绑定车牌
             toVehicle() {
-               this.$navTo('pages/vehicle/index');
+               this.$navTo('pagesA/vehicle/index');
             }
         }
     }

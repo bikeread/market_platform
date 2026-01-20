@@ -216,7 +216,7 @@
 
       // 跳转到商品详情页
       onTargetGoods(goodsId) {
-        this.$navTo('pages/goods/detail', { goodsId })
+        this.$navTo('pagesA/goods/detail', { goodsId })
       },
 
       // 点击去逛逛按钮, 跳转到首页
@@ -242,7 +242,7 @@
         const app = this
         if (app.checkedIds.length) {
           const cartIds = app.checkedIds.join()
-          app.$navTo('pages/settlement/goods', { cartIds })
+          app.$navTo('pagesA/settlement/goods', { cartIds })
         }
       },
 

@@ -36,7 +36,7 @@
        * 跳转到定位页面页面
        */
       onTargetLocation() {
-        this.$navTo('pages/location/index')
+        this.$navTo('pagesA/location/index')
       }
     }
 

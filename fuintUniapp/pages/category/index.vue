@@ -4,7 +4,7 @@
     <Location v-if="storeInfo" :storeInfo="storeInfo"/>
     
     <!-- 搜索框 -->
-    <Search tips="请输入搜索关键字..." @event="$navTo('pages/search/index')" />
+    <Search tips="请输入搜索关键字..." @event="$navTo('pagesA/search/index')" />
 
     <view class="cate-content dis-flex" v-if="list.length > 0">
       <!-- 左侧 分类 -->
@@ -271,7 +271,7 @@
        },
       
       onTargetGoods(goodsId) {
-        this.$navTo(`pages/goods/detail`, { goodsId })
+        this.$navTo(`pagesA/goods/detail`, { goodsId })
       },
 
       setListHeight() {

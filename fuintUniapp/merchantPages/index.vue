@@ -247,7 +247,7 @@
         const app = this
         uni.scanCode({
             success:function(res){
-                app.$navTo('pages/confirm/doConfirm?code=' + res.result + '&id=0')
+                app.$navTo('pagesA/confirm/doConfirm?code=' + res.result + '&id=0')
             }
         });
       },
@@ -257,7 +257,7 @@
           const app = this
           uni.scanCode({
               success:function(res){
-                  app.$navTo('pages/pay/cashier?code=' + res.result)
+                  app.$navTo('pagesA/pay/cashier?code=' + res.result)
               }
           });
       },

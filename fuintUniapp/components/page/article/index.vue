@@ -57,7 +57,7 @@
        */
       onTargetDetail(id) {
         uni.navigateTo({
-          url: '/pages/article/detail?articleId=' + id
+          url: '/pagesA/article/detail?articleId=' + id
         })
       }
 
