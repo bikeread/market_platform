@@ -1,0 +1,39 @@
+# Maven 构建产物
+target/
+*/target/
+
+# IDE 文件
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# 日志
+logs/
+*.log
+
+# 上传文件
+upload/
+
+# 测试
+**/src/test/
+
+# 文档
+*.md
+!README.md
+
+# Docker 相关 (防止循环)
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# 其他
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp

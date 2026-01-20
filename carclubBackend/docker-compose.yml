@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # 后端应用
+  carclub-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: carclub-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - TZ=Asia/Shanghai
+      # 数据库配置 (覆盖配置文件)
+      - SPRING_DATASOURCE_URL=jdbc:mysql://carclub-mysql:3306/carclub-car?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123456
+      # Redis 配置
+      - SPRING_REDIS_HOST=carclub-redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=carclub123
+    volumes:
+      # 上传文件持久化
+      - ./upload:/app/upload
+      # 日志持久化
+      - ./logs:/app/logs
+    depends_on:
+      carclub-mysql:
+        condition: service_healthy
+      carclub-redis:
+        condition: service_healthy
+    networks:
+      - carclub-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # MySQL 数据库
+  carclub-mysql:
+    image: mysql:8.0
+    container_name: carclub-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123456
+      - MYSQL_DATABASE=carclub-car
+      - MYSQL_CHARSET=utf8mb4
+      - TZ=Asia/Shanghai
+    volumes:
+      # 数据持久化
+      - mysql_data:/var/lib/mysql
+      # 初始化脚本
+      - ./db:/docker-entrypoint-initdb.d:ro
+      # 自定义配置
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - carclub-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Redis 缓存
+  carclub-redis:
+    image: redis:7-alpine
+    container_name: carclub-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass carclub123 --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - carclub-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "carclub123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  carclub-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:

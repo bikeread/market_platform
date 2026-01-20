@@ -37,6 +37,57 @@ mysql -u root -p carclub-car < db/update_for_20250414.sql
 # ... 依次执行其他 update_for_*.sql
 ```
 
+### Docker 部署 (生产环境)
+
+**生产服务器信息：**
+- 服务器: prod-server (43.161.219.118)
+- 后端端口: 8083
+- API 地址: http://43.161.219.118:8083
+- Swagger: http://43.161.219.118:8083/swagger-ui.html
+- Docker 镜像: bikeread2008/carclub-backend:latest
+- 数据库: mysql-prod (carclub-car)
+- Redis: redis-prod
+
+```bash
+# 1. 本地构建镜像
+docker build -t carclub-backend:latest -t bikeread2008/carclub-backend:latest .
+
+# 2. 推送到 Docker Hub
+docker push bikeread2008/carclub-backend:latest
+
+# 3. 服务器拉取并重启
+ssh prod-server "docker pull bikeread2008/carclub-backend:latest && docker stop carclub-backend-prod && docker rm carclub-backend-prod"
+
+# 4. 启动新容器
+ssh prod-server "docker run -d \
+  --name carclub-backend-prod \
+  --network business-network \
+  --restart unless-stopped \
+  -p 8083:9090 \
+  -e TZ=Asia/Shanghai \
+  -e JAVA_OPTS='-Xms256m -Xmx512m -XX:+UseG1GC' \
+  -v carclub_upload:/app/upload \
+  -v carclub_logs:/app/logs \
+  bikeread2008/carclub-backend:latest"
+
+# 快速更新 (一行命令)
+docker build -t bikeread2008/carclub-backend:latest . && \
+docker push bikeread2008/carclub-backend:latest && \
+ssh prod-server "docker pull bikeread2008/carclub-backend:latest && docker restart carclub-backend-prod"
+
+# 查看日志
+ssh prod-server "docker logs -f carclub-backend-prod --tail 100"
+
+# 进入容器
+ssh prod-server "docker exec -it carclub-backend-prod bash"
+```
+
+**相关文件：**
+- `Dockerfile` - 多阶段构建配置
+- `docker-compose.prod.yml` - 生产环境编排
+- `.dockerignore` - 构建忽略文件
+- `deploy.sh` - 部署脚本
+
 ### 开发环境配置
 
 修改 `configure/dev/application.properties`:
@@ -55,7 +106,7 @@ carclub-application (主应用, 可执行 JAR)
                     └── carclub-utils (二维码, Excel, 加密工具)
 ```
 
-### API 层划分 (carclub-application/src/main/java/com/fuint/module/)
+### API 层划分 (carclub-application/src/main/java/com/carclub/module/)
 
 | 目录 | 说明 | 路径前缀 |
 |------|------|----------|
@@ -64,7 +115,7 @@ carclub-application (主应用, 可执行 JAR)
 | `backendApi/` | 管理后台 API | `/backendApi/*` |
 | `schedule/` | 定时任务 (6个 Job) | - |
 
-### 核心业务服务 (carclub-application/src/main/java/com/fuint/common/service/)
+### 核心业务服务 (carclub-application/src/main/java/com/carclub/common/service/)
 
 52+ 个业务服务，按领域划分：
 - 会员: `MemberService`, `UserGradeService`, `AccountService`
@@ -103,7 +154,7 @@ carclub-application (主应用, 可执行 JAR)
 
 ## 定时任务
 
-位于 `carclub-application/src/main/java/com/fuint/module/schedule/`:
+位于 `carclub-application/src/main/java/com/carclub/module/schedule/`:
 
 | Job | 功能 | 配置开关 |
 |-----|------|----------|
