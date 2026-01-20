@@ -17,8 +17,8 @@ x64:
     - dist/electron/**/*
 nsis:
   script: |-
-    !include "C:\Code\fuintCarSystem\fuintCashier\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
-    !addincludedir "C:\Code\fuintCarSystem\fuintCashier\node_modules\app-builder-lib\templates\nsis\include"
+    !include "C:\Code\carclubCarSystem\carclubCashier\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
+    !addincludedir "C:\Code\carclubCarSystem\carclubCashier\node_modules\app-builder-lib\templates\nsis\include"
     !macro _isUpdated _a _b _t _f
       ${StdUtils.TestParameter} $R9 "updated"
       StrCmp "$R9" "true" `${_t}` `${_f}`

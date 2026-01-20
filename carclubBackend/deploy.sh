@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Fuint 后端 Docker 部署脚本
+# Carclub 后端 Docker 部署脚本
 
 set -e
 

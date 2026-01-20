@@ -28,13 +28,13 @@ market/
 mvn clean install
 
 # 打包 JAR
-mvn clean package -pl fuint-application -am
+mvn clean package -pl carclub-application -am
 
 # 运行 (端口 8080)
-java -jar fuint-application/target/carclub-car-1.0.0.jar
+java -jar carclub-application/target/carclub-car-1.0.0.jar
 
 # 生产环境脚本
-./sbin/start.sh fuint-application/target/carclub-car-1.0.0.jar
+./sbin/start.sh carclub-application/target/carclub-car-1.0.0.jar
 ./sbin/stop.sh
 ./sbin/restart.sh
 
@@ -81,10 +81,10 @@ yarn build:win64  # 64位 Windows
 ### 后端模块依赖
 
 ```
-fuint-application (主应用)
-    └── fuint-framework (Web框架/分页/异常)
-            └── fuint-repository (MyBatis Mapper/实体类)
-                    └── fuint-utils (工具类)
+carclub-application (主应用)
+    └── carclub-framework (Web框架/分页/异常)
+            └── carclub-repository (MyBatis Mapper/实体类)
+                    └── carclub-utils (工具类)
 ```
 
 ### 后端 API 层
@@ -111,7 +111,7 @@ fuint-application (主应用)
 
 ### 开发账号
 
-后台登录: `fuint` / `123456`
+后台登录: `admin` / `123456`
 
 ### 前端环境变量
 

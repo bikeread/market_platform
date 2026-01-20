@@ -3,7 +3,7 @@
 ```bash
 
 # 进入项目目录
-cd fuint-cashier-web
+cd carclub-cashier-web
 
 # 安装依赖
 npm install
