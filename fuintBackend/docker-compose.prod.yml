@@ -1,0 +1,40 @@
+version: '3.8'
+
+# 生产环境部署配置 - 使用已有的 mysql-prod 和 redis-prod
+
+services:
+  fuint-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fuint-backend:latest
+    container_name: fuint-backend-prod
+    restart: unless-stopped
+    ports:
+      - "8083:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - TZ=Asia/Shanghai
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+    volumes:
+      # 上传文件持久化
+      - fuint_upload:/app/upload
+      # 日志持久化
+      - fuint_logs:/app/logs
+    networks:
+      - prod-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+networks:
+  prod-network:
+    external: true
+    name: business-network
+
+volumes:
+  fuint_upload:
+  fuint_logs:
