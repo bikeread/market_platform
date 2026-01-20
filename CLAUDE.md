@@ -4,24 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-Fuint 汽车会员营销系统 - 开源的多平台实体店铺会员管理和营销解决方案。采用前后端分离架构，包含 Java 后端、多个 Vue.js/Uniapp 前端及 Electron 桌面应用。
+Carclub 汽车会员营销系统 - 开源的多平台实体店铺会员管理和营销解决方案。采用前后端分离架构，包含 Java 后端、多个 Vue.js/Uniapp 前端及 Electron 桌面应用。
 
 ## 仓库结构
 
 ```
 market/
-├── fuintBackend/      # Spring Boot 后端 (后台+小程序+收银接口)
-├── fuintAdmin/        # 管理后台前端 (Vue + Element-UI)
-├── fuintUniapp/       # 会员端小程序/H5 (Uniapp)
-├── fuintCashier/      # 收银系统桌面版 (Electron + Vue)
-├── fuintCashierWeb/   # 收银系统网页版 (Vue + Element-UI)
+├── carclubBackend/      # Spring Boot 后端 (后台+小程序+收银接口)
+├── carclubAdmin/        # 管理后台前端 (Vue + Element-UI)
+├── carclubUniapp/       # 会员端小程序/H5 (Uniapp)
+├── carclubCashier/      # 收银系统桌面版 (Electron + Vue)
+├── carclubCashierWeb/   # 收银系统网页版 (Vue + Element-UI)
 ├── 安装配置文档/       # 安装配置说明
 └── 需求文档/          # 需求文档
 ```
 
 ## 常用命令
 
-### 后端 (fuintBackend)
+### 后端 (carclubBackend)
 
 ```bash
 # 编译
@@ -31,19 +31,19 @@ mvn clean install
 mvn clean package -pl fuint-application -am
 
 # 运行 (端口 8080)
-java -jar fuint-application/target/fuint-car-1.0.0.jar
+java -jar fuint-application/target/carclub-car-1.0.0.jar
 
 # 生产环境脚本
-./sbin/start.sh fuint-application/target/fuint-car-1.0.0.jar
+./sbin/start.sh fuint-application/target/carclub-car-1.0.0.jar
 ./sbin/stop.sh
 ./sbin/restart.sh
 
 # 数据库初始化
-mysql -u root -p fuint-car < db/fuint-car.sql
-mysql -u root -p fuint-car < db/update_for_*.sql  # 按日期顺序执行
+mysql -u root -p carclub-car < db/carclub-car.sql
+mysql -u root -p carclub-car < db/update_for_*.sql  # 按日期顺序执行
 ```
 
-### 管理后台 (fuintAdmin)
+### 管理后台 (carclubAdmin)
 
 ```bash
 npm install  # 或 npm install --registry=https://registry.npmmirror.com
@@ -54,7 +54,7 @@ npm run lint  # ESLint 检查
 
 > **注意**: Node.js 17+ 需要添加 `NODE_OPTIONS=--openssl-legacy-provider` 解决 OpenSSL 兼容性问题
 
-### 收银网页版 (fuintCashierWeb)
+### 收银网页版 (carclubCashierWeb)
 
 ```bash
 npm install
@@ -62,7 +62,7 @@ npm run dev  # 开发模式 (端口 8081)
 npm run build:prod
 ```
 
-### 收银桌面版 (fuintCashier)
+### 收银桌面版 (carclubCashier)
 
 ```bash
 yarn install
@@ -72,7 +72,7 @@ yarn build:win32  # 32位 Windows
 yarn build:win64  # 64位 Windows
 ```
 
-### 会员端 (fuintUniapp)
+### 会员端 (carclubUniapp)
 
 使用 HBuilderX IDE 导入并编译，需先修改 `manifest.json` 中的 appid。
 
@@ -107,7 +107,7 @@ fuint-application (主应用)
 ### 必需服务
 
 - MySQL 8.0+ (配置: `configure/dev/application.properties`)
-- Redis (默认: localhost:6379, 密码: fuint123)
+- Redis (默认: localhost:6379, 密码: carclub123)
 
 ### 开发账号
 
@@ -124,10 +124,10 @@ VUE_APP_SERVER_URL=http://localhost:8080/
 
 | 项目 | 配置文件 |
 |------|----------|
-| 后端开发环境 | `fuintBackend/configure/dev/application.properties` |
-| 后端生产环境 | `fuintBackend/configure/prod/application.properties` |
-| 管理后台 | `fuintAdmin/.env.development`, `.env.production` |
-| 小程序 | `fuintUniapp/manifest.json` (appid 必须修改) |
+| 后端开发环境 | `carclubBackend/configure/dev/application.properties` |
+| 后端生产环境 | `carclubBackend/configure/prod/application.properties` |
+| 管理后台 | `carclubAdmin/.env.development`, `.env.production` |
+| 小程序 | `carclubUniapp/manifest.json` (appid 必须修改) |
 
 ## 代码规范
 
@@ -148,7 +148,7 @@ VUE_APP_SERVER_URL=http://localhost:8080/
 
 ## 注意事项
 
-- fuintUniapp 的 `manifest.json` appid 必须修改，否则影响登录和支付
+- carclubUniapp 的 `manifest.json` appid 必须修改，否则影响登录和支付
 - 后端配置需修改: 数据库、Redis、微信 appId/appSecret
 - 数据库升级脚本需按日期顺序执行
 - 无自动化测试套件，需手动测试
