@@ -99,25 +99,34 @@
         const app = this
         const defaultData = ['默认']
         const skuNameArr = []
-        if (specValueIds) {
-          specValueIds.forEach((valueId, specId) => {
-            const specValueName = app.getSpecValueName(valueId, specId)
-            skuNameArr.push(specValueName)
-          })
+        
+        if (specValueIds != "" && specValueIds.length > 0) {
+            specValueIds.forEach((valueId, specId) => {
+               const specValueName = app.getSpecValueName(valueId, specId)
+               skuNameArr.push(specValueName)
+            })
         }
-        return skuNameArr.length ? skuNameArr : defaultData
+                
+        const result = skuNameArr.length ? skuNameArr : defaultData
+                
+        return result
       },
 
       // 获取指定的规格值名称
       getSpecValueName(valueId, specId) {
         const app = this
         const { goods: { specList } } = app
-        const res = specList[specId].valueList.find(specValue => {
-          return specValue.specValueId == valueId
-        })
         
-        if (res) {
-            return res.specValue
+        if (specList.length > 0) {
+            const res = specList[specId].valueList.find(specValue => {
+              return specValue.specValueId == valueId
+            })
+            
+            if (res) {
+                return res.specValue
+            } else {
+                return ""
+            }
         } else {
             return ""
         }
@@ -125,14 +134,14 @@
 
       // 整理规格数据
       getSpecList() {
-        const { goods: { specList } } = this
-        const defaultData = [{ name: '默认', list: [{ name: '默认' }] }]
-        const specData = []
-        if (specList) {
+        const { goods: { specList } } = this;
+        const defaultData = [{ name: '默认', list: [{ name: '默认' }] }];
+        const specData = [];
+        if (specList.length > 0) {
             specList.forEach(group => {
-              const children = []
+              const children = [];
               group.valueList.forEach(specValue => {
-                children.push({ name: specValue.specValue })
+                children.push({ name: specValue.specValue });
               })
               specData.push({
                 name: group.name,
@@ -140,7 +149,7 @@
               })
             })
         }
-        return specData.length ? specData : defaultData
+        return specData.length > 0 ? specData : defaultData
       },
 
       // sku组件 开始-----------------------------------------------------------
@@ -164,7 +173,7 @@
             // 隐藏当前弹窗
             app.onChangeValue(false);
             // 购物车商品总数量
-            const cartTotal = result.data.cartTotal ? result.data.cartTotal : 0;
+            const cartTotal = result.data ? result.data.cartTotal : 0;
             // 缓存购物车数量
             setCartTotalNum(cartTotal);
             // 传递给父级

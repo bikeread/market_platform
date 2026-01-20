@@ -108,7 +108,7 @@
   const service = [
     { id: 'order', name: '会员订单', icon: 'dingdan', type: 'link', url: 'merchantPages/order/index' },
     { id: 'rechange', name: '会员充值', icon: 'qiandai', type: 'link', url: 'merchantPages/balance/recharge' },
-    { id: 'payment', name: '余额扣减', icon: 'shouhou', type: 'link', url: 'pages/pay/cashier' },
+    { id: 'payment', name: '余额扣减', icon: 'shouhou', type: 'link', url: 'pagesA/pay/cashier' },
     { id: 'myCoupon', name: '卡券发放', icon: 'youhuiquan', type: 'link', url: 'merchantPages/coupon/receive' },
     { id: 'points', name: '会员积分', icon: 'jifen', type: 'link', url: 'merchantPages/points/detail' },
     { id: 'setting', name: '会员信息', icon: 'shezhi1', type: 'link', url: 'merchantPages/member/setting' },
@@ -254,7 +254,7 @@
 
       // 跳转到我的卡券列表页
       onTargetMyCoupon(type) {
-         this.$navTo('pages/my-coupon/index?type='+type+'&memberId='+this.memberId)
+         this.$navTo('pagesA/my-coupon/index?type='+type+'&memberId='+this.memberId)
       },
       
       // 跳转会员设置页面

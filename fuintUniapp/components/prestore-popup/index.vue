@@ -163,7 +163,7 @@
             return false
         }
         
-        this.$navTo('pages/settlement/index', { couponId: this.couponInfo.id, selectNum: selected })
+        this.$navTo('pagesA/settlement/index', { couponId: this.couponInfo.id, selectNum: selected })
       },
       // 弹窗
       toast(title, icon) {

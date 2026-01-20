@@ -45,7 +45,7 @@
             if (linkObj == 'vehicleScan') {
                 uni.scanCode({
                     success:function(res){
-                       app.$navTo('pages/vehicle/order?code=' + res.result);
+                       app.$navTo('pagesA/vehicle/order?code=' + res.result);
                     }
                 });
             } else {

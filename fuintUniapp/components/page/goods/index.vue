@@ -133,7 +133,7 @@
        * 跳转商品详情页
        */
       onTargetGoods(goodsId) {
-        this.$navTo(`pages/goods/detail`, { goodsId })
+        this.$navTo(`pagesA/goods/detail`, { goodsId })
       },
       
       /**

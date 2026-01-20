@@ -196,15 +196,15 @@
    */
   const service = [
     { id: 'myCoupon', name: '卡券兑换', icon: 'youhuiquan', type: 'link', url: 'subPages/coupon/receive' },
-    { id: 'coupon', name: '转赠记录', icon: 'lingquan', type: 'link', url: 'pages/give/index' },
-    { id: 'points', name: '我的积分', icon: 'jifen', type: 'link', url: 'pages/points/detail' },
+    { id: 'coupon', name: '转赠记录', icon: 'lingquan', type: 'link', url: 'pagesA/give/index' },
+    { id: 'points', name: '我的积分', icon: 'jifen', type: 'link', url: 'pagesA/points/detail' },
     { id: 'book', name: '我的预约', icon: 'tuxingyanzhengma', type: 'link', url: 'subPages/book/my' },
-    { id: 'help', name: '我的帮助', icon: 'bangzhu', type: 'link', url: 'pages/help/index' },
+    { id: 'help', name: '我的帮助', icon: 'bangzhu', type: 'link', url: 'pagesA/help/index' },
     { id: 'contact', name: '在线客服', icon: 'kefu', type: 'button', openType: 'contact' },
-    { id: 'address', name: '收货地址', icon: 'shouhuodizhi', type: 'link', url: 'pages/address/index' },
-    { id: 'refund', name: '售后服务', icon: 'shouhou', type: 'link', url: 'pages/refund/index' },
+    { id: 'address', name: '收货地址', icon: 'shouhuodizhi', type: 'link', url: 'pagesA/address/index' },
+    { id: 'refund', name: '售后服务', icon: 'shouhou', type: 'link', url: 'pagesA/refund/index' },
     { id: 'setting', name: '个人信息', icon: 'shezhi1', type: 'link', url: 'pages/user/setting' },
-    { id: 'share', name: '邀请有礼', icon: 'fenxiang-post', type: 'link', url: 'pages/share/index' }
+    { id: 'share', name: '邀请有礼', icon: 'fenxiang-post', type: 'link', url: 'pagesA/share/index' }
   ]
 
   export default {
@@ -396,31 +396,31 @@
       // 跳转我的余额
       toMemberWallet(userId) {
           !this.isLogin && this.$navTo('pages/login/index')
-          this.$navTo('pages/wallet/index', { userId: userId})
+          this.$navTo('pagesA/wallet/index', { userId: userId})
       },
       
       // 跳转充值
       toRecharge(userId) {
           !this.isLogin && this.$navTo('pages/login/index')
-          this.$navTo('pages/wallet/recharge/index', { userId: userId})
+          this.$navTo('pagesA/wallet/recharge/index', { userId: userId})
       },
 
       // 跳转到订单页
       onTargetOrder(item) {
           !this.isLogin && this.$navTo('pages/login/index')
-          this.$navTo('pages/order/index', { dataType: item.id })
+          this.$navTo('pagesA/order/index', { dataType: item.id })
       },
       
       // 跳转到服务单页
       onTargetVehicleOrder(item) {
           !this.isLogin && this.$navTo('pages/login/index')
-          this.$navTo('pages/vehicleOrder/index', { dataType: item.id })
+          this.$navTo('pagesA/vehicleOrder/index', { dataType: item.id })
       },
 
       // 跳转到我的积分页面
       onTargetPoints() {
          !this.isLogin && this.$navTo('pages/login/index')
-         this.$navTo('pages/points/detail')
+         this.$navTo('pagesA/points/detail')
       },
 
       // 跳转到我的卡券列表页
@@ -436,12 +436,12 @@
                   }, fail(res) {
                       console.log("调用失败:", res)
                   }, complete() {
-                      app.$navTo('pages/my-coupon/index?type='+type)
+                      app.$navTo('pagesA/my-coupon/index?type='+type)
                   }})
               })
               // #endif
               // #ifndef MP-WEIXIN
-                 app.$navTo('pages/my-coupon/index?type='+type)
+                 app.$navTo('pagesA/my-coupon/index?type='+type)
               // #endif
           } else {
               app.$navTo('pages/login/index')

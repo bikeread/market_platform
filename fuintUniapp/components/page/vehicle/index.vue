@@ -27,7 +27,7 @@
      */
     methods: {
       toVehicle() {
-         this.$navTo('pages/vehicle/index');
+         this.$navTo('pagesA/vehicle/index');
       }
     }
 
